@@ -13,6 +13,7 @@ func NewLogger(ctx context.Context) *logrus.Logger {
 	log.SetFormatter(&LogFormatter{})
 	log.SetReportCaller(true)
 	log.SetOutput(global.LogFileWriter)
+	log.WithContext(ctx)
 	if conf.GetEnv() == consts.EnvDev {
 		log.SetLevel(logrus.TraceLevel)
 	} else {
