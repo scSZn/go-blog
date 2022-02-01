@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"github.com/scSZn/blog/consts"
 	"github.com/spf13/viper"
 	"log"
 	"path"
@@ -8,7 +9,7 @@ import (
 	"time"
 )
 
-var setting *Setting
+var setting = GetSetting()
 var once sync.Once
 
 func GetSetting() *Setting {
@@ -17,6 +18,8 @@ func GetSetting() *Setting {
 		v.SetConfigType("yml")
 		v.AddConfigPath("./conf")
 		v.SetConfigName("setting")
+		v.RegisterAlias("dbsetting", "database")
+		v.RegisterAlias("logsetting", "log")
 
 		err := v.ReadInConfig()
 		if err != nil {
@@ -26,28 +29,52 @@ func GetSetting() *Setting {
 		if err != nil {
 			log.Fatalf("unmashal conf fail, err: %v", err)
 		}
+
 	})
 	return setting
 }
 
 type Setting struct {
-	Env string
-	Log LogSetting
+	Env        string
+	LogSetting *LogSetting
+	DBSetting  *DatabaseSetting
 }
 
 type LogSetting struct {
-	Path     string
-	Filename string
-	Suffix   string
+	Path       string
+	Filename   string
+	Suffix     string
+	MaxSize    int
+	MaxBackups int
+}
+
+type DatabaseSetting struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	Dbname   string
+	Charset  string
+	Protocol string
 }
 
 func GetEnv() string {
-	return GetSetting().Env
+	if setting.Env == "" {
+		return consts.EnvDev
+	}
+	return setting.Env
 }
 
-func GetLogPath() string {
-	setting := GetSetting()
+func (ls *LogSetting) GetLogPath() string {
 	now := time.Now()
-	suffix := now.Format(setting.Log.Suffix)
-	return path.Join(setting.Log.Path, setting.Log.Filename) + "." + suffix
+	suffix := now.Format(ls.Suffix)
+	return path.Join(ls.Path, ls.Filename) + "." + suffix
+}
+
+func GetDatabaseSetting() *DatabaseSetting {
+	return setting.DBSetting
+}
+
+func GetLogSetting() *LogSetting {
+	return setting.LogSetting
 }
