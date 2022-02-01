@@ -22,7 +22,7 @@ const TagTableName = "tag"
 // Tag 标签结构体
 type Tag struct {
 	*Model
-	TagID        string `json:"tag_id" gorm:"column:tag_id,unique"`
+	TagID        string `json:"tag_id" gorm:"column:tag_id;unique"`
 	TagName      string `json:"tag_name" gorm:"column:tag_name"`
 	ArticleCount uint32 `json:"article_count" gorm:"column:article_count"`
 }

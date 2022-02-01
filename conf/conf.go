@@ -1,18 +1,20 @@
 package conf
 
 import (
-	"github.com/scSZn/blog/consts"
-	"github.com/spf13/viper"
 	"log"
 	"path"
 	"sync"
 	"time"
+
+	"github.com/spf13/viper"
+
+	"github.com/scSZn/blog/consts"
 )
 
-var setting = GetSetting()
+var setting *Setting
 var once sync.Once
 
-func GetSetting() *Setting {
+func init() {
 	once.Do(func() {
 		v := viper.New()
 		v.SetConfigType("yml")
@@ -31,6 +33,9 @@ func GetSetting() *Setting {
 		}
 
 	})
+}
+
+func GetSetting() *Setting {
 	return setting
 }
 

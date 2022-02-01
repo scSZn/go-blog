@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"github.com/scSZn/blog/conf"
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/pkg/database"
 	"github.com/scSZn/blog/pkg/logger"
-	"log"
 )
 
 func Init() {

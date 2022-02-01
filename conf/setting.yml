@@ -1,6 +1,6 @@
 env: dev
 log:
-  path: ./logger
+  path: ./log
   filename: blog.logger
   suffix: 2006010215
   max_size: 512

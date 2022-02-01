@@ -1,8 +1,9 @@
 package global
 
 import (
-	"github.com/scSZn/blog/pkg/logger"
 	"gorm.io/gorm"
+
+	"github.com/scSZn/blog/pkg/logger"
 )
 
 var (

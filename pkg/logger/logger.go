@@ -2,20 +2,16 @@ package logger
 
 import (
 	"context"
-	"github.com/scSZn/blog/conf"
-	"github.com/scSZn/blog/consts"
+
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"time"
+
+	"github.com/scSZn/blog/conf"
+	"github.com/scSZn/blog/consts"
 )
 
 type Logger struct {
 	*logrus.Logger
-}
-
-func (l *Logger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (l *Logger) Tracef(ctx context.Context, format string, args ...interface{}) {

@@ -11,10 +11,10 @@ create table article
     summary    varchar(2048) charset utf8 null,
     content    longtext                   null,
     status     tinyint                    null,
-    create_at  datetime                   null,
-    update_at  datetime                   null,
+    created_at  datetime                   null,
+    updated_at  datetime                   null,
     is_del     tinyint                    null,
-    delete_at  datetime                   null,
+    deleted_at  datetime                   null,
     constraint article_id unique (article_id)
 ) charset utf8mb4;
 
@@ -26,9 +26,9 @@ create table tag
     tag_name      varchar(20) null,
     article_count int         null,
     status        tinyint     null,
-    create_at     datetime    null,
-    update_at     datetime    null,
-    delete_at     datetime    null,
+    created_at     datetime    null,
+    updated_at     datetime    null,
+    deleted_at     datetime    null,
     is_del        tinyint     null,
     constraint tag_id unique (tag_id)
 ) charset utf8mb4;
@@ -49,8 +49,7 @@ create table blog_ext
     id         bigint primary key auto_increment,
     article_id varchar(64) null,
     view_count int         null,
-    like_count int         null,
-    constraint blog_ext_ibfk_1 foreign key (article_id) references article (article_id)
+    like_count int         null
 ) charset utf8mb4;
 
 create index fk_article_ext on blog_ext (article_id);

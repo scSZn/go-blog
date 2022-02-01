@@ -23,8 +23,8 @@ const ArticleTableName = "article"
 // Article 文章结构体
 type Article struct {
 	*Model
-	ArticleID string `json:"article_id" gorm:"column:article_id,unique"`
-	Title     string `json:"title" gorm:"column:article"`
+	ArticleID string `json:"article_id" gorm:"column:article_id;unique"`
+	Title     string `json:"title" gorm:"column:title"`
 	Author    string `json:"author" gorm:"column:author"`
 	Summary   string `json:"summary" gorm:"column:summary"`
 	Content   string `json:"content" gorm:"column:content"`
