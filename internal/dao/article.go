@@ -33,7 +33,6 @@ func (a *ArticleDAO) GetArticleByArticleID(ctx context.Context, articleID string
 	return result, err
 }
 
-func (a *ArticleDAO) CreateArticle(ctx context.Context, article *model.Article) error {
-	var result *model.Article
-	return a.DB.Model(result).Create(article).Error
+func (a *ArticleDAO) CreateArticle(article *model.Article) error {
+	return a.DB.Create(article).Error
 }

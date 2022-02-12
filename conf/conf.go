@@ -22,6 +22,7 @@ func init() {
 		v.SetConfigName("setting")
 		v.RegisterAlias("dbsetting", "database")
 		v.RegisterAlias("logsetting", "log")
+		v.RegisterAlias("appsetting", "app")
 
 		err := v.ReadInConfig()
 		if err != nil {
@@ -41,8 +42,14 @@ func GetSetting() *Setting {
 
 type Setting struct {
 	Env        string
+	AppSetting *AppSetting
 	LogSetting *LogSetting
 	DBSetting  *DatabaseSetting
+}
+
+type AppSetting struct {
+	Host string
+	Port string
 }
 
 type LogSetting struct {
@@ -82,4 +89,13 @@ func GetDatabaseSetting() *DatabaseSetting {
 
 func GetLogSetting() *LogSetting {
 	return setting.LogSetting
+}
+
+func GetAppSetting() *AppSetting {
+	return setting.AppSetting
+}
+
+func GetListenAddr() string {
+	appSetting := GetAppSetting()
+	return appSetting.Host + ":" + appSetting.Port
 }
