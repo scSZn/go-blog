@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -56,6 +57,12 @@ func (l *Logger) Fatal(ctx context.Context, args ...interface{}) {
 
 func (l *Logger) Fatalf(ctx context.Context, format string, args ...interface{}) {
 	l.Logger.Fatalf(format, args...)
+}
+
+// 对gorm的日志做处理，去除中间的换行符
+func (l *Logger) Printf(format string, args ...interface{}) {
+	format = strings.ReplaceAll(format, "\n", "")
+	l.Logger.Printf(format, args...)
 }
 
 func NewLogger(setting *conf.LogSetting) (*Logger, error) {
