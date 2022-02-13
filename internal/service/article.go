@@ -39,11 +39,12 @@ func (as *ArticleService) CreateArticle(request CreateArticleRequest) error {
 	articleDao := dao.NewArticleDAO(tx)
 	tagArticleDao := dao.NewTagArticleDAO(tx)
 	article := &model.Article{
-		Title:     request.Title,
-		Author:    request.Author,
-		Summary:   request.Summary,
-		Content:   request.Content,
-		ArticleID: uuid.New().String(), // todo: ArticleID 使用分布式ID
+		Title:         request.Title,
+		Author:        request.Author,
+		Summary:       request.Summary,
+		BackgroundURL: request.BackgroundURL,
+		Content:       request.Content,
+		ArticleID:     uuid.New().String(), // todo: ArticleID 使用分布式ID
 	}
 
 	err := articleDao.CreateArticle(article)
