@@ -11,18 +11,22 @@ import (
 )
 
 type ArticleDAO struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
-func NewArticleDAO() *ArticleDAO {
+func NewArticleDAO(db *gorm.DB) *ArticleDAO {
 	return &ArticleDAO{
-		DB: global.DB,
+		db: db,
 	}
+}
+
+func (a *ArticleDAO) GetDB() *gorm.DB {
+	return a.db
 }
 
 func (a *ArticleDAO) GetArticleByArticleID(ctx context.Context, articleID string) (*model.Article, error) {
 	var result *model.Article
-	err := a.DB.Table(model.ArticleTableName).Where("article_id = ?", articleID).First(&result).Error
+	err := a.db.Table(model.ArticleTableName).Where("article_id = ?", articleID).First(&result).Error
 	if err != nil {
 		if err == sql.ErrNoRows {
 			global.Logger.Infof(ctx, "[dao.GetArticleByArticleID] no rows, article_id: %s", articleID)
@@ -34,5 +38,5 @@ func (a *ArticleDAO) GetArticleByArticleID(ctx context.Context, articleID string
 }
 
 func (a *ArticleDAO) CreateArticle(article *model.Article) error {
-	return a.DB.Create(article).Error
+	return a.db.Create(article).Error
 }

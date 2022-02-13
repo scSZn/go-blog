@@ -11,7 +11,7 @@ func NewRouter() *gin.Engine {
 	router.Use(middleware.Default())
 	group := router.Group("/api/v1")
 	{
-		group.POST("/article", v1.CreateArticle)
+		group.POST("/articles", v1.CreateArticle)
 	}
 	return router
 }

@@ -2,37 +2,27 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/service"
+	"github.com/scSZn/blog/pkg/app"
+	"github.com/scSZn/blog/pkg/errcode"
 )
 
-type CreateArticleRequest struct {
-	Title   string `json:"title"`
-	Author  string `json:"author"`
-	Summary string `json:"summary"`
-	Content string `json:"content"`
-}
-
 func CreateArticle(ctx *gin.Context) {
-	var request CreateArticleRequest
+	request := service.CreateArticleRequest{}
 	err := ctx.Bind(&request)
 	if err != nil {
 		global.Logger.Errorf(ctx, "bind error, err: %v", err)
 		return
 	}
 
-	svc := service.NewArticleService()
-	svcRequest := service.CreateArticleRequest{
-		Title:   request.Title,
-		Summary: request.Summary,
-		Content: request.Content,
-		Author:  request.Author,
-	}
-
-	err = svc.CreateArticle(ctx, svcRequest)
+	response := app.NewResponse(ctx)
+	svc := service.NewArticleService(ctx)
+	err = svc.CreateArticle(request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "bind error, err: %v", err)
-		ctx.JSON(500, "create article error")
+		global.Logger.Errorf(ctx, "create article error, err: %v", err)
+		response.ReturnError(errcode.CreateArticleError)
 		return
 	}
 	ctx.JSON(200, "create article success")
