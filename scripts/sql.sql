@@ -44,8 +44,8 @@ create table tag_article
     constraint uni_tag_article unique (tag_id, article_id)
 ) charset utf8mb4;
 
-drop table if exists `blog_ext`;
-create table blog_ext
+drop table if exists `article_ext`;
+create table article_ext
 (
     id         bigint primary key auto_increment,
     article_id varchar(64) null,
@@ -53,4 +53,4 @@ create table blog_ext
     like_count int         null
 ) charset utf8mb4;
 
-create index fk_article_ext on blog_ext (article_id);
+create index fk_article_ext on article_ext (article_id);

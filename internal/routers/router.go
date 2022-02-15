@@ -12,7 +12,7 @@ func NewRouter() *gin.Engine {
 	group := router.Group("/api/v1")
 	{
 		group.POST("/articles", v1.CreateArticle)
-		group.GET("/articles")
+		group.GET("/articles", v1.ListArticleAdmin)
 	}
 	return router
 }

@@ -29,6 +29,7 @@ type ListArticleRequest struct {
 	TagIDs []string `json:"tag_ids"`
 	Author string   `json:"author"` // todo: 采用多选的形式？？
 	Status uint8    `json:"status"` // 状态值，内部使用（1：草稿，2：发布，3：禁用，4：删除）
+	IsDel  *bool
 	app.Pager
 }
 
@@ -49,6 +50,10 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 	tx := as.db.Begin()
 	articleDao := dao.NewArticleDAO(tx)
 	tagArticleDao := dao.NewTagArticleDAO(tx)
+	tagDao := dao.NewTagDAO(tx)
+	articleExtDao := dao.NewArticleExtDAO(tx)
+
+	// 创建文章
 	article := &model.Article{
 		Title:         request.Title,
 		Author:        request.Author,
@@ -57,18 +62,38 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 		Content:       request.Content,
 		ArticleID:     uuid.New().String(), // todo: ArticleID 使用分布式ID
 	}
-
 	err := articleDao.CreateArticle(article)
 	if err != nil {
 		tx.Rollback()
 		return errors.Wrap(err, "ArticleService.CreateArticle: create article fail")
 	}
 
+	// 创建文章扩展信息
+	err = articleExtDao.Create(&model.ArticleExt{
+		ArticleID: article.ArticleID,
+		ViewCount: 0,
+		LikeCount: 0,
+	})
+	if err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "ArticleService.CreateArticle: create article ext fail")
+	}
+
+	// 创建文章与标签的关联关系
 	err = tagArticleDao.CreateTagArticleBatch(article.ArticleID, request.TagIDs...)
 	if err != nil {
 		tx.Rollback()
 		return errors.Wrap(err, "ArticleService.CreateArticle: create tag article relationship fail")
 	}
+
+	// 更新标签的文章数量
+	err = tagDao.AddCount(request.TagIDs)
+	if err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "ArticleService.CreateArticle: update tag count fail")
+	}
+
+	// 提交事务
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()

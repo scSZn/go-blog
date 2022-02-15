@@ -29,6 +29,7 @@ type Article struct {
 	Summary       string `json:"summary" gorm:"column:summary"`
 	BackgroundURL string `json:"background_url" gorm:"column:background_url"`
 	Content       string `json:"content" gorm:"column:content"`
+	ArticleExt    `gorm:"-"`
 }
 
 func (a *Article) TableName() string {

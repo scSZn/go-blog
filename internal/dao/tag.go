@@ -18,6 +18,14 @@ func NewTagDAO(db *gorm.DB) *TagDAO {
 	}
 }
 
+func (d *TagDAO) AddCount(tagIDs []string) error {
+	err := d.db.Exec("UPDATE tag SET article_count = article_count + 1 WHERE tag_id in ?", tagIDs).Error
+	if err != nil {
+		return errors.Wrap(err, "TagDAO.AddCount: update count fail: ")
+	}
+	return nil
+}
+
 // GetTagByTagIDBatch 批量获取标签
 func (d *TagDAO) GetTagByTagIDBatch(tagID ...string) ([]*model.Tag, error) {
 	var result []*model.Tag
