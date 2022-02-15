@@ -16,8 +16,25 @@ func NewResponse(ctx *gin.Context) *Response {
 	}
 }
 
-func (r *Response) ReturnJSON(data interface{}) {
-	r.ctx.JSON(http.StatusOK, data)
+func (r *Response) ReturnData(data interface{}) {
+	r.ctx.JSON(http.StatusOK, gin.H{
+		"code":    errcode.Success.Code,
+		"message": errcode.Success.Message,
+		"data":    data,
+	})
+}
+
+func (r *Response) ReturnList(data interface{}, pager Pager, total int64) {
+	r.ctx.JSON(http.StatusOK, gin.H{
+		"code":    errcode.Success.Code,
+		"message": errcode.Success.Message,
+		"data": gin.H{
+			"total": total,
+			"page":  pager.GetPage(),
+			"limit": pager.GetLimit(),
+			"data":  data,
+		},
+	})
 }
 
 func (r *Response) ReturnError(err *errcode.Error) {

@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"github.com/pkg/errors"
+	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/internal/model"
 	"gorm.io/gorm"
 )
@@ -27,5 +29,28 @@ func (d *TagArticleDAO) CreateTagArticleBatch(articleID string, tagIDs ...string
 			TagID:     tagID,
 		})
 	}
-	return d.db.CreateInBatches(tagArticles, 10).Error
+	if err := d.db.Create(tagArticles).Error; err != nil {
+		return errors.Wrap(err, "TagArticleDAO.CreateTagArticleBatch:create tag_article relationship fail")
+	}
+	return nil
+}
+
+// GetTagIDsByArticleID 获取articleID文章的所有关联信息
+func (d *TagArticleDAO) GetTagIDsByArticleID(articleID string) ([]*model.TagArticle, error) {
+	var result []*model.TagArticle
+	db := d.db.Table(model.TagArticleTableName).Where("article_id = ? AND is_del = ?", articleID, consts.NoDelStatus).Scan(&result)
+	if err := db.Error; err != nil {
+		return nil, errors.Wrap(err, "TagArticleDAO.GetTagIDsByArticleID: get article tag relationship fail")
+	}
+	return result, nil
+}
+
+// GetTagIDsByArticleIDBatch 批量获取articleID文章的所有关联信息
+func (d *TagArticleDAO) GetTagIDsByArticleIDBatch(articleIDs ...string) ([]*model.TagArticle, error) {
+	var result []*model.TagArticle
+	db := d.db.Table(model.TagArticleTableName).Where("article_id in ? AND is_del = ?", articleIDs, consts.NoDelStatus).Scan(&result)
+	if err := db.Error; err != nil {
+		return nil, errors.Wrap(err, "TagArticleDAO.GetTagIDsByArticleIDBatch: get article tag relationship fail")
+	}
+	return result, nil
 }

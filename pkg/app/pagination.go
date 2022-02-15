@@ -11,3 +11,17 @@ func (p *Pager) GetOffset() int {
 	}
 	return (p.Page - 1) * p.Limit
 }
+
+func (p *Pager) GetLimit() int {
+	if p.Limit <= 0 {
+		return 20 // todo: 配置化？
+	}
+	return p.Limit
+}
+
+func (p *Pager) GetPage() int {
+	if p.Page <= 0 {
+		return 0
+	}
+	return p.Page
+}

@@ -9,7 +9,10 @@ import (
 
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/dao"
+	"github.com/scSZn/blog/internal/dto"
 	"github.com/scSZn/blog/internal/model"
+	"github.com/scSZn/blog/pkg/app"
+	"github.com/scSZn/blog/pkg/set"
 )
 
 type CreateArticleRequest struct {
@@ -19,6 +22,14 @@ type CreateArticleRequest struct {
 	Content       string   `json:"content"`
 	TagIDs        []string `json:"tag_ids"`
 	BackgroundURL string   `json:"background_url"`
+}
+
+type ListArticleRequest struct {
+	Title  string   `json:"title"`
+	TagIDs []string `json:"tag_ids"`
+	Author string   `json:"author"` // todo: 采用多选的形式？？
+	Status uint8    `json:"status"` // 状态值，内部使用（1：草稿，2：发布，3：禁用，4：删除）
+	app.Pager
 }
 
 type ArticleService struct {
@@ -34,7 +45,7 @@ func NewArticleService(ctx context.Context) *ArticleService {
 	return service
 }
 
-func (as *ArticleService) CreateArticle(request CreateArticleRequest) error {
+func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 	tx := as.db.Begin()
 	articleDao := dao.NewArticleDAO(tx)
 	tagArticleDao := dao.NewTagArticleDAO(tx)
@@ -64,4 +75,106 @@ func (as *ArticleService) CreateArticle(request CreateArticleRequest) error {
 		return errors.Wrap(err, "ArticleService.CreateArticle: commit fail")
 	}
 	return nil
+}
+
+// List 获取文章列表
+// request.Status 是否需要根据状态值来筛选文章
+// request.IsDel 是否需要获取已被软删除的文章
+func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseInfo, error) {
+
+	articleDao := dao.NewArticleDAO(as.db)
+	tagArticleDao := dao.NewTagArticleDAO(as.db)
+	tagDao := dao.NewTagDAO(as.db)
+
+	listParam := &dao.ListArticleParams{
+		TitleLike:  request.Title,
+		AuthorLike: request.Author,
+		TagIDs:     request.TagIDs,
+		Status:     request.Status,
+	}
+
+	// 获取符合条件的文章
+	articles, err := articleDao.List(listParam, request.Pager)
+	if err != nil {
+		return nil, errors.Wrap(err, "ArticleService.List: query articles fail")
+	}
+
+	// 组装文章ID
+	articleIDs := make([]string, 0, len(articles))
+	for _, article := range articles {
+		articleIDs = append(articleIDs, article.ArticleID)
+	}
+
+	// 根据文章ID批量获取标签文章关联关系，并使用集合过滤
+	tagArticles, err := tagArticleDao.GetTagIDsByArticleIDBatch(articleIDs...)
+	tagIDSet := set.NewStringSet()
+	for _, tagArticle := range tagArticles {
+		tagIDSet.Add(tagArticle.TagID)
+	}
+	// 将标签文章关联信息封装成map[articleID][]tagID，方便查找
+	var articleTagMap = make(map[string][]string, len(articles))
+	for _, tagArticle := range tagArticles {
+		articleID := tagArticle.ArticleID
+		tagID := tagArticle.TagID
+		if _, ok := articleTagMap[articleID]; ok {
+			articleTagMap[articleID] = append(articleTagMap[articleID], tagID)
+		} else {
+			articleTagMap[articleID] = []string{tagID}
+		}
+	}
+
+	// 批量获取标签信息
+	tags, err := tagDao.GetTagByTagIDBatch(tagIDSet.Elements()...)
+	if err != nil {
+		return nil, errors.Wrap(err, "ArticleService.List: query tag fail")
+	}
+
+	// 将标签信息封装成map，方便查找
+	var tagMap = make(map[string]*model.Tag, len(tags))
+	for _, tag := range tags {
+		tagMap[tag.TagID] = tag
+	}
+
+	var result = make([]*dto.ArticleBaseInfo, 0, len(articles))
+	for _, article := range articles {
+		articleBaseInfo := &dto.ArticleBaseInfo{
+			Model:         article.Model,
+			Title:         article.Title,
+			Summary:       article.Summary,
+			Author:        article.Author,
+			ArticleID:     article.ArticleID,
+			BackgroundURL: article.BackgroundURL,
+		}
+		tagIDs := articleTagMap[article.ArticleID]
+		tags := make([]*model.Tag, 0, len(tagIDs))
+		for _, tagID := range tagIDs {
+			tags = append(tags, tagMap[tagID])
+		}
+		articleBaseInfo.Tags = tags
+		result = append(result, articleBaseInfo)
+	}
+
+	return result, nil
+}
+
+// Count 获取符合条件的文章数量
+// request.Status 是否需要根据状态值来筛选文章
+// request.IsDel 是否需要获取已被软删除的文章
+func (as *ArticleService) Count(request *ListArticleRequest) (int64, error) {
+
+	articleDao := dao.NewArticleDAO(as.db)
+
+	listParam := &dao.ListArticleParams{
+		TitleLike:  request.Title,
+		AuthorLike: request.Author,
+		TagIDs:     request.TagIDs,
+		Status:     request.Status,
+	}
+
+	// 获取符合条件的文章
+	count, err := articleDao.Count(listParam)
+	if err != nil {
+		return count, errors.Wrap(err, "ArticleService.List: query articles fail")
+	}
+	return count, nil
 }

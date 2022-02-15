@@ -3,12 +3,23 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"github.com/scSZn/blog/pkg/app"
+	"strings"
 
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/model"
 )
+
+type ListArticleParams struct {
+	TitleLike  string
+	AuthorLike string
+	TagIDs     []string
+	Status     uint8
+	IsDel      *bool
+}
 
 type ArticleDAO struct {
 	db *gorm.DB
@@ -39,4 +50,67 @@ func (a *ArticleDAO) GetArticleByArticleID(ctx context.Context, articleID string
 
 func (a *ArticleDAO) CreateArticle(article *model.Article) error {
 	return a.db.Create(article).Error
+}
+
+// List 根据条件查询文章
+// TODO: 是否接入ES
+func (a *ArticleDAO) List(params *ListArticleParams, pager app.Pager) ([]*model.Article, error) {
+	db := a.db.Table(model.ArticleTableName)
+	params.TitleLike = strings.TrimSpace(params.TitleLike)
+	params.AuthorLike = strings.TrimSpace(params.AuthorLike)
+
+	// todo: like 空字符串是否有性能上的缺失，加了索引和不加索引分别进行测试
+	if params.TitleLike != "" {
+		db = db.Where("title like %?%", params.TitleLike)
+	}
+	if params.AuthorLike != "" {
+		db = db.Where("author like %?%", params.AuthorLike)
+	}
+	if len(params.TagIDs) > 0 {
+		db = db.Where("tag_id in %s", params.TagIDs)
+	}
+	if params.Status != 0 {
+		db = db.Where("status = ?", params.Status)
+	}
+	if params.IsDel != nil {
+		db = db.Where("is_del = ?", *(params.IsDel))
+	}
+
+	db = db.Offset(pager.GetOffset()).Limit(pager.GetLimit())
+	var result []*model.Article
+	if err := db.Scan(&result).Error; err != nil {
+		return nil, errors.Wrap(err, "ArticleDAO.List: query article list fail")
+	}
+	return result, nil
+}
+
+// List 根据条件查询文章
+// TODO: 是否接入ES
+func (a *ArticleDAO) Count(params *ListArticleParams) (int64, error) {
+	db := a.db.Table(model.ArticleTableName)
+	params.TitleLike = strings.TrimSpace(params.TitleLike)
+	params.AuthorLike = strings.TrimSpace(params.AuthorLike)
+
+	// todo: like 空字符串是否有性能上的缺失，加了索引和不加索引分别进行测试
+	if params.TitleLike != "" {
+		db = db.Where("title like %?%", params.TitleLike)
+	}
+	if params.AuthorLike != "" {
+		db = db.Where("author like %?%", params.AuthorLike)
+	}
+	if len(params.TagIDs) > 0 {
+		db = db.Where("tag_id in %s", params.TagIDs)
+	}
+	if params.Status != 0 {
+		db = db.Where("status = ?", params.Status)
+	}
+	if params.IsDel != nil {
+		db = db.Where("is_del = ?", *(params.IsDel))
+	}
+
+	var count int64
+	if err := db.Count(&count).Error; err != nil {
+		return 0, errors.Wrap(err, "ArticleDAO.Count: query article count fail")
+	}
+	return count, nil
 }

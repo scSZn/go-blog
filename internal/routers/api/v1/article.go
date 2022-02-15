@@ -9,21 +9,47 @@ import (
 	"github.com/scSZn/blog/pkg/errcode"
 )
 
+// CreateArticle 新建博客
 func CreateArticle(ctx *gin.Context) {
 	request := service.CreateArticleRequest{}
 	err := ctx.Bind(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "v1.CreateArticle: bind error, err: %v", err)
 		return
 	}
 
 	response := app.NewResponse(ctx)
 	svc := service.NewArticleService(ctx)
-	err = svc.CreateArticle(request)
+	err = svc.CreateArticle(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "create article error, err: %v", err)
+		global.Logger.Errorf(ctx, "v1.CreateArticle: create article error, err: %v", err)
 		response.ReturnError(errcode.CreateArticleError)
 		return
 	}
-	ctx.JSON(200, "create article success")
+	response.ReturnData("create article success")
+}
+
+func ListArticleAdmin(ctx *gin.Context) {
+	request := service.ListArticleRequest{}
+	err := ctx.Bind(&request)
+	if err != nil {
+		global.Logger.Errorf(ctx, "v1.ListArticleAdmin: bind error, err: %v", err)
+		return
+	}
+
+	response := app.NewResponse(ctx)
+	svc := service.NewArticleService(ctx)
+	total, err := svc.Count(&request)
+	if err != nil {
+		global.Logger.Errorf(ctx, "v1.ListArticleAdmin: count article error, err: %v", err)
+		response.ReturnError(errcode.ListArticleError)
+		return
+	}
+	articles, err := svc.List(&request)
+	if err != nil {
+		global.Logger.Errorf(ctx, "v1.ListArticleAdmin: list article error, err: %v", err)
+		response.ReturnError(errcode.ListArticleError)
+		return
+	}
+	response.ReturnList(articles, request.Pager, total)
 }
