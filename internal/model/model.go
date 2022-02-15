@@ -8,10 +8,10 @@ import (
 
 // Model gorm.Model 的定义
 type Model struct {
-	ID        uint  `gorm:"primaryKey"`
-	Status    uint8 `gorm:"default:1"` // 1：草稿，2：发布，3：禁用，4：删除
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	IsDel     bool           `gorm:"default:false"`
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Status    uint8          `json:"status" gorm:"default:1"` // 1：草稿，2：发布，3：禁用，4：删除
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	IsDel     bool           `json:"is_del" gorm:"default:false"`
 }

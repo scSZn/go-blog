@@ -25,11 +25,11 @@ type CreateArticleRequest struct {
 }
 
 type ListArticleRequest struct {
-	Title  string   `json:"title"`
-	TagIDs []string `json:"tag_ids"`
-	Author string   `json:"author"` // todo: 采用多选的形式？？
-	Status uint8    `json:"status"` // 状态值，内部使用（1：草稿，2：发布，3：禁用，4：删除）
-	IsDel  *bool
+	Title  string   `json:"title" form:"title"`
+	TagIDs []string `json:"tag_ids" form:"tag_ids"`
+	Author string   `json:"author" form:"author"` // todo: 采用多选的形式？？
+	Status uint8    `json:"status" form:"status"` // 状态值，内部使用（1：草稿，2：发布，3：禁用，4：删除）
+	IsDel  *bool    `json:"-"`
 	app.Pager
 }
 
@@ -116,6 +116,7 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 		AuthorLike: request.Author,
 		TagIDs:     request.TagIDs,
 		Status:     request.Status,
+		IsDel:      request.IsDel,
 	}
 
 	// 获取符合条件的文章

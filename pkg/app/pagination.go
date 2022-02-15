@@ -1,8 +1,8 @@
 package app
 
 type Pager struct {
-	Page  int `json:"page"`
-	Limit int `json:"limit"`
+	Page  int `json:"page" form:"page"`
+	Limit int `json:"limit" form:"limit"`
 }
 
 func (p *Pager) GetOffset() int {
