@@ -29,7 +29,8 @@ type Article struct {
 	Summary       string `json:"summary" gorm:"column:summary"`
 	BackgroundURL string `json:"background_url" gorm:"column:background_url"`
 	Content       string `json:"content" gorm:"column:content"`
-	ArticleExt    `gorm:"-"`
+	ViewCount     int64  `json:"view_count" gorm:"column:view_count"`
+	LikeCount     int64  `json:"like_count" gorm:"column:like_count"`
 }
 
 func (a *Article) TableName() string {

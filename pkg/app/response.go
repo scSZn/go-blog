@@ -18,16 +18,16 @@ func NewResponse(ctx *gin.Context) *Response {
 
 func (r *Response) ReturnData(data interface{}) {
 	r.ctx.JSON(http.StatusOK, gin.H{
-		"code":    errcode.Success.Code,
-		"message": errcode.Success.Message,
-		"data":    data,
+		"code": errcode.Success.Code,
+		"msg":  errcode.Success.Message,
+		"data": data,
 	})
 }
 
 func (r *Response) ReturnList(data interface{}, pager Pager, total int64) {
 	r.ctx.JSON(http.StatusOK, gin.H{
-		"code":    errcode.Success.Code,
-		"message": errcode.Success.Message,
+		"code": errcode.Success.Code,
+		"msg":  errcode.Success.Message,
 		"data": gin.H{
 			"total": total,
 			"page":  pager.GetPage(),
@@ -40,7 +40,7 @@ func (r *Response) ReturnList(data interface{}, pager Pager, total int64) {
 func (r *Response) ReturnError(err *errcode.Error) {
 	r.ctx.JSON(http.StatusOK, gin.H{
 		"code":    err.Code,
-		"message": err.Message,
+		"msg":     err.Message,
 		"details": err.Detail,
 	})
 }

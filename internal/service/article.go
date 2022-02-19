@@ -51,7 +51,6 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 	articleDao := dao.NewArticleDAO(tx)
 	tagArticleDao := dao.NewTagArticleDAO(tx)
 	tagDao := dao.NewTagDAO(tx)
-	articleExtDao := dao.NewArticleExtDAO(tx)
 
 	// 创建文章
 	article := &model.Article{
@@ -68,12 +67,6 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 		return errors.Wrap(err, "ArticleService.CreateArticle: create article fail")
 	}
 
-	// 创建文章扩展信息
-	err = articleExtDao.Create(&model.ArticleExt{
-		ArticleID: article.ArticleID,
-		ViewCount: 0,
-		LikeCount: 0,
-	})
 	if err != nil {
 		tx.Rollback()
 		return errors.Wrap(err, "ArticleService.CreateArticle: create article ext fail")
