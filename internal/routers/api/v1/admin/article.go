@@ -1,8 +1,7 @@
-package v1
+package admin
 
 import (
 	"github.com/gin-gonic/gin"
-
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/service"
 	"github.com/scSZn/blog/pkg/app"
@@ -14,7 +13,7 @@ func CreateArticle(ctx *gin.Context) {
 	request := service.CreateArticleRequest{}
 	err := ctx.Bind(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "v1.CreateArticle: bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.CreateArticle: bind error, err: %v", err)
 		return
 	}
 
@@ -22,7 +21,7 @@ func CreateArticle(ctx *gin.Context) {
 	svc := service.NewArticleService(ctx)
 	err = svc.CreateArticle(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "v1.CreateArticle: create article error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.CreateArticle: create article error, err: %v", err)
 		response.ReturnError(errcode.CreateArticleError)
 		return
 	}

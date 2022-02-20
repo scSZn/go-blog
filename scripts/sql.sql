@@ -33,7 +33,8 @@ create table tag
     updated_at    datetime    null,
     deleted_at    datetime    null,
     is_del        tinyint     not null,
-    constraint uni_tag_id unique (tag_id)
+    unique key uni_tag_id (tag_id),
+    unique key uni_tag_name (tag_name)
 ) charset utf8mb4;
 
 drop table if exists `tag_article`;

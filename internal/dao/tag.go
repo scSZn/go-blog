@@ -5,7 +5,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/internal/model"
+	"github.com/scSZn/blog/pkg/app"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type TagDAO struct {
@@ -16,6 +18,20 @@ func NewTagDAO(db *gorm.DB) *TagDAO {
 	return &TagDAO{
 		db: db,
 	}
+}
+
+func (d *TagDAO) CreateTag(tag *model.Tag) error {
+	db := d.db.Table(model.TagTableName).Clauses(clause.OnConflict{
+		DoNothing: true,
+	}).Create(tag)
+
+	if err := db.Error; err != nil {
+		return errors.Wrap(err, "TagDAO.CreateTag: create tag fail: ")
+	}
+	if db.RowsAffected == 0 {
+		return app.TagAlreadyExistError
+	}
+	return nil
 }
 
 func (d *TagDAO) AddCount(tagIDs []string) error {

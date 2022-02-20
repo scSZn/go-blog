@@ -1,6 +1,10 @@
 package errcode
 
-import "log"
+import (
+	"encoding/json"
+	"log"
+	"strings"
+)
 
 type Error struct {
 	Code    int      `json:"code"`
@@ -19,4 +23,11 @@ func NewError(code int, message string, detail ...string) *Error {
 		Message: message,
 		Detail:  detail,
 	}
+}
+
+func (e *Error) Error() string {
+	buffer := strings.Builder{}
+	marshal, _ := json.Marshal(e)
+	buffer.Write(marshal)
+	return buffer.String()
 }
