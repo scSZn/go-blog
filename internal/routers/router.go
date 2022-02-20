@@ -20,6 +20,8 @@ func NewRouter() *gin.Engine {
 		admin.GET("/articles", v1Admin.ListArticleAdmin)
 
 		admin.POST("/tags", v1Admin.CreateTag)
+		admin.GET("/tags", v1Admin.ListTag)
+		admin.GET("/tags/status", v1Admin.TagStatus)
 
 		admin.GET("/info", v1Admin.Info)
 	}

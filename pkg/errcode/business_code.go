@@ -7,5 +7,6 @@ var (
 	ListArticleError   = NewError(2002, "list article fail")
 
 	CreateTagError       = NewError(3001, "create tag fail")
-	TagAlreadyExistError = NewError(3101, "tag already exist")
+	ListTagError         = NewError(3002, "list tag fail")
+	TagAlreadyExistError = NewError(3003, "tag already exist")
 )

@@ -18,3 +18,14 @@ database:
   dbname: blog_db
   charset: utf8
   protocol: tcp
+status:
+  tag:
+    - value: 20
+      name: published
+      display: 生效中
+    - value: 40
+      name: forbidden
+      display: 禁用
+    - value: 50
+      name: deleted
+      display: 删除

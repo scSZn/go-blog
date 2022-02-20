@@ -2,12 +2,11 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
+	"github.com/scSZn/blog/conf"
 
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/service"
 	"github.com/scSZn/blog/pkg/app"
-	"github.com/scSZn/blog/pkg/errcode"
 )
 
 func CreateTag(ctx *gin.Context) {
@@ -22,13 +21,38 @@ func CreateTag(ctx *gin.Context) {
 	svc := service.NewTagService(ctx)
 	err = svc.CreateTag(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "admin.CreateTag: create tag error, err: %v", err)
-		if errors.Is(err, errcode.TagAlreadyExistError) {
-			response.ReturnError(errcode.TagAlreadyExistError)
-			return
-		}
-		response.ReturnError(errcode.CreateTagError)
+		response.ReturnError(err)
 		return
 	}
 	response.ReturnData("create tag success")
+}
+
+func ListTag(ctx *gin.Context) {
+	request := service.ListTagRequest{}
+	err := ctx.Bind(&request)
+	if err != nil {
+		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %v", err)
+		return
+	}
+
+	response := app.NewResponse(ctx)
+	svc := service.NewTagService(ctx)
+	data, err := svc.ListTag(&request)
+	if err != nil {
+		response.ReturnError(err)
+		return
+	}
+	total, err := svc.CountTag(&request)
+	if err != nil {
+		response.ReturnError(err)
+		return
+	}
+	response.ReturnList(data, request.Pager, total)
+}
+
+func TagStatus(ctx *gin.Context) {
+	tagStatus := conf.GetSetting().TagStatus
+	response := app.NewResponse(ctx)
+
+	response.ReturnData(tagStatus)
 }

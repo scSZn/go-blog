@@ -23,6 +23,7 @@ func init() {
 		v.RegisterAlias("dbsetting", "database")
 		v.RegisterAlias("logsetting", "log")
 		v.RegisterAlias("appsetting", "app")
+		v.RegisterAlias("tagstatus", "status.tag")
 
 		err := v.ReadInConfig()
 		if err != nil {
@@ -44,6 +45,7 @@ type Setting struct {
 	AppSetting *AppSetting
 	LogSetting *LogSetting
 	DBSetting  *DatabaseSetting
+	TagStatus  []Status
 }
 
 type AppSetting struct {
@@ -68,6 +70,12 @@ type DatabaseSetting struct {
 	Dbname   string
 	Charset  string
 	Protocol string
+}
+
+type Status struct {
+	Value   int
+	Name    string
+	Display string
 }
 
 func GetEnv() string {

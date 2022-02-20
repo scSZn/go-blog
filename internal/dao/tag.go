@@ -2,6 +2,7 @@ package dao
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/internal/model"
@@ -9,6 +10,14 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
+
+type ListTagParams struct {
+	TagName  string
+	IsDel    *bool
+	Status   *uint8
+	OrderKey string
+	Order    string
+}
 
 type TagDAO struct {
 	db *gorm.DB
@@ -20,18 +29,59 @@ func NewTagDAO(db *gorm.DB) *TagDAO {
 	}
 }
 
-func (d *TagDAO) CreateTag(tag *model.Tag) error {
+func (d *TagDAO) CreateTag(tag *model.Tag) (int64, error) {
 	db := d.db.Table(model.TagTableName).Clauses(clause.OnConflict{
 		DoNothing: true,
 	}).Create(tag)
 
 	if err := db.Error; err != nil {
-		return errors.Wrap(err, "TagDAO.CreateTag: create tag fail: ")
+		return 0, errors.Wrap(err, "TagDAO.CreateTag: create tag fail: ")
 	}
-	if db.RowsAffected == 0 {
-		return app.TagAlreadyExistError
+	return db.RowsAffected, nil
+}
+
+func (d *TagDAO) ListTag(params *ListTagParams, pager *app.Pager) ([]*model.Tag, error) {
+	db := d.db.Table(model.TagTableName)
+	if params.TagName != "" {
+		db = db.Where("tag_name like %?%", params.TagName)
 	}
-	return nil
+	if params.Status != nil {
+		db = db.Where("status = ?", *(params.Status))
+	}
+	if params.IsDel != nil {
+		db = db.Where("is_del = ?", *(params.IsDel))
+	}
+	if params.OrderKey != "" && params.Order != "" {
+		db = db.Order(fmt.Sprintf("%s %s", params.OrderKey, params.Order))
+	}
+	if pager != nil {
+		db = db.Offset(pager.GetOffset()).Limit(pager.GetLimit())
+	}
+	var result []*model.Tag
+	if err := db.Scan(&result).Error; err != nil && err != sql.ErrNoRows {
+		return nil, errors.Wrap(err, "TagDAO.ListTag: list tag fail: ")
+	}
+
+	return result, nil
+}
+
+func (d *TagDAO) CountTag(params *ListTagParams) (int64, error) {
+	db := d.db.Table(model.TagTableName)
+	if params.TagName != "" {
+		db = db.Where("tag_name like %?%", params.TagName)
+	}
+	if params.Status != nil {
+		db = db.Where("status = ?", *(params.Status))
+	}
+	if params.IsDel != nil {
+		db = db.Where("is_del = ?", *(params.IsDel))
+	}
+	var result int64
+	if err := db.Count(&result).Error; err != nil && err != sql.ErrNoRows {
+		return 0, errors.Wrap(err, "TagDAO.CountTag: count tag fail: ")
+	}
+
+	return result, nil
 }
 
 func (d *TagDAO) AddCount(tagIDs []string) error {

@@ -32,15 +32,19 @@ func (r *Response) ReturnList(data interface{}, pager Pager, total int64) {
 			"total": total,
 			"page":  pager.GetPage(),
 			"limit": pager.GetLimit(),
-			"data":  data,
+			"list":  data,
 		},
 	})
 }
 
-func (r *Response) ReturnError(err *errcode.Error) {
-	r.ctx.JSON(http.StatusOK, gin.H{
-		"code":    err.Code,
-		"msg":     err.Message,
-		"details": err.Detail,
-	})
+func (r *Response) ReturnError(err error) {
+	if newErr, ok := err.(*errcode.Error); ok {
+		r.ctx.JSON(http.StatusOK, gin.H{
+			"code":    newErr.Code,
+			"msg":     newErr.Message,
+			"details": newErr.Detail,
+		})
+		return
+	}
+	r.ctx.JSON(http.StatusInternalServerError, gin.H{})
 }
