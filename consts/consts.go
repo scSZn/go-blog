@@ -22,10 +22,12 @@ const (
 
 // 状态枚举值
 const (
-	StatusDraft   = 1 // 草稿（博客特有）
-	StatusEnable  = 2 // 可用（博客和标签都可用）
-	StatusDisable = 3 // 禁用（博客和标签都可用）
-	StatusDeleted = 4 // 删除（博客和标签都可用）
+	StatusDraft        = 0  // 草稿（博客特有）
+	StatusWaitingAudit = 10 // 待审核（博客特有）
+	StatusEnable       = 20 // 可用（博客和标签都可用）
+	StatusReject       = 30 // 禁用（博客特有）
+	StatusDisable      = 40 // 禁用（博客和标签都可用）
+	StatusDeleted      = 50 // 删除（博客和标签都可用）
 )
 
 // TokenHeaderKey 登录Token

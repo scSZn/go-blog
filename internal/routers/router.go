@@ -22,6 +22,7 @@ func NewRouter() *gin.Engine {
 		admin.POST("/tags", v1Admin.CreateTag)
 		admin.GET("/tags", v1Admin.ListTag)
 		admin.GET("/tags/status", v1Admin.TagStatus)
+		admin.DELETE("/tags/:tag_id", v1Admin.DeleteTag)
 
 		admin.GET("/info", v1Admin.Info)
 	}

@@ -40,6 +40,17 @@ func (d *TagDAO) CreateTag(tag *model.Tag) (int64, error) {
 	return db.RowsAffected, nil
 }
 
+func (d *TagDAO) DeleteTag(tagID string) (int64, error) {
+	db := d.db.Table(model.TagTableName).Where("tag_id = ?", tagID).Updates(map[string]interface{}{
+		"is_del": consts.DelStatus,
+	})
+
+	if err := db.Error; err != nil {
+		return 0, errors.Wrap(err, "TagDAO.DeleteTag: delete tag fail: ")
+	}
+	return db.RowsAffected, nil
+}
+
 func (d *TagDAO) ListTag(params *ListTagParams, pager *app.Pager) ([]*model.Tag, error) {
 	db := d.db.Table(model.TagTableName)
 	if params.TagName != "" {

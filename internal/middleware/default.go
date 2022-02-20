@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/scSZn/blog/global"
 	"io/ioutil"
-	"log"
 )
 
 func Default() gin.HandlerFunc {
@@ -33,6 +32,5 @@ func Default() gin.HandlerFunc {
 		}
 		global.Logger.Infof(ctx, "request coming, message: %v", string(marshal))
 		ctx.Next()
-		log.Printf("%v", ctx.Writer.Header())
 	}
 }

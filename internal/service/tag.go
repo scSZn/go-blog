@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/dao"
 	"github.com/scSZn/blog/internal/model"
@@ -14,6 +15,10 @@ import (
 type CreateTagRequest struct {
 	TagName string `json:"tag_name"`
 	app.Pager
+}
+
+type DeleteTagRequest struct {
+	TagID string `json:"tag_id" uri:"tag_id"`
 }
 
 type ListTagRequest struct {
@@ -50,14 +55,26 @@ func (ts *TagService) CreateTag(request *CreateTagRequest) error {
 
 	rowAffected, err := tagDao.CreateTag(tag)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.Create: create tag fail: ", err)
+		global.Logger.Errorf(ts.ctx, "TagService.CreateTag: create tag fail: ", err)
 		return errcode.CreateTagError
 	}
 
 	if rowAffected == 0 {
-		global.Logger.Warnf(ts.ctx, "TagService.Create: tag %s already exists", request.TagName)
+		global.Logger.Warnf(ts.ctx, "TagService.CreateTag: tag %s already exists", request.TagName)
 		return errcode.TagAlreadyExistError
 	}
+	return nil
+}
+
+func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
+	tagDao := dao.NewTagDAO(ts.db)
+
+	_, err := tagDao.DeleteTag(request.TagID)
+	if err != nil {
+		global.Logger.Errorf(ts.ctx, "TagService.DeleteTag: delete tag fail: ", err)
+		return errcode.DeleteTagError
+	}
+
 	return nil
 }
 
@@ -72,6 +89,11 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*model.Tag, error) {
 	}
 
 	result, err := tagDao.ListTag(&params, &request.Pager)
+	for _, tag := range result {
+		if tag.IsDel {
+			tag.Status = consts.StatusDeleted
+		}
+	}
 	if err != nil {
 		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail: %v", err)
 		return nil, errcode.ListTagError

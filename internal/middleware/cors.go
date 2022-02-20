@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/scSZn/blog/conf"
 	"github.com/scSZn/blog/pkg/app"
-	"log"
 	"strings"
 )
 
@@ -19,10 +18,8 @@ func CORS() gin.HandlerFunc {
 	allowOrigins := conf.GetAppSetting().AllowOrigins
 	return func(ctx *gin.Context) {
 		origin := ctx.GetHeader(originHeaderKey)
-		log.Println(origin)
 		for _, allowOrigin := range allowOrigins {
 			if strings.Contains(allowOrigin, origin) {
-				//ctx.Writer.Header().Set(accessControlAllowOrigin, "*")
 				ctx.Header(accessControlAllowOrigin, origin)
 				ctx.Header(accessControlAllowMethods, "GET, PUT, OPTIONS, POST, DELETE")
 				ctx.Header(accessControlAllowCredentials, "true")

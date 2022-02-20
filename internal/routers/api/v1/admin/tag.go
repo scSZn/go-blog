@@ -27,6 +27,24 @@ func CreateTag(ctx *gin.Context) {
 	response.ReturnData("create tag success")
 }
 
+func DeleteTag(ctx *gin.Context) {
+	request := service.DeleteTagRequest{}
+	err := ctx.BindUri(&request)
+	if err != nil {
+		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %v", err)
+		return
+	}
+
+	response := app.NewResponse(ctx)
+	svc := service.NewTagService(ctx)
+	err = svc.DeleteTag(&request)
+	if err != nil {
+		response.ReturnError(err)
+		return
+	}
+	response.ReturnData("delete tag success")
+}
+
 func ListTag(ctx *gin.Context) {
 	request := service.ListTagRequest{}
 	err := ctx.Bind(&request)
