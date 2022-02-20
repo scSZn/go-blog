@@ -27,3 +27,6 @@ const (
 	StatusDisable = 3 // 禁用（博客和标签都可用）
 	StatusDeleted = 4 // 删除（博客和标签都可用）
 )
+
+// TokenHeaderKey 登录Token
+const TokenHeaderKey = "token"

@@ -32,7 +32,6 @@ func init() {
 		if err != nil {
 			log.Fatalf("unmashal conf fail, err: %v", err)
 		}
-
 	})
 }
 
@@ -48,8 +47,9 @@ type Setting struct {
 }
 
 type AppSetting struct {
-	Host string
-	Port string
+	Host         string
+	Port         string
+	AllowOrigins []string `json:"allow_origins"`
 }
 
 type LogSetting struct {

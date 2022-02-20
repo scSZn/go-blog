@@ -2,9 +2,8 @@ env: dev
 app:
   host: localhost
   port: 8080
-  allow_origin:
-    - http://localhost:9528
-    -
+  allowOrigins:
+    - http://localhost:8081
 log:
   path: ./log
   filename: blog.logger
