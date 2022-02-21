@@ -2,14 +2,16 @@ package service
 
 import (
 	"context"
+
 	"github.com/google/uuid"
+	"gorm.io/gorm"
+
 	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/dao"
 	"github.com/scSZn/blog/internal/model"
 	"github.com/scSZn/blog/pkg/app"
 	"github.com/scSZn/blog/pkg/errcode"
-	"gorm.io/gorm"
 )
 
 type CreateTagRequest struct {
@@ -60,7 +62,7 @@ func (ts *TagService) CreateTag(request *CreateTagRequest) error {
 
 	rowAffected, err := tagDao.CreateTag(tag)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.CreateTag: create tag fail: ", err)
+		global.Logger.Errorf(ts.ctx, "TagService.CreateTag: create tag fail, request is %v, err: %v", request, err)
 		return errcode.CreateTagError
 	}
 
@@ -76,7 +78,7 @@ func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
 
 	_, err := tagDao.DeleteTag(request.TagID)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.DeleteTag: delete tag fail: ", err)
+		global.Logger.Errorf(ts.ctx, "TagService.DeleteTag: delete tag fail, tag_id is %v, err: %v", request.TagID, err)
 		return errcode.DeleteTagError
 	}
 
@@ -100,7 +102,7 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*model.Tag, error) {
 		}
 	}
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail: %v", err)
+		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail, params is %v, err: %v", params, err)
 		return nil, errcode.ListTagError
 	}
 
@@ -119,7 +121,7 @@ func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
 
 	result, err := tagDao.CountTag(&params)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.CountTag: count tag fail: %v", err)
+		global.Logger.Errorf(ts.ctx, "TagService.CountTag: count tag fail, params is %v, err: %v", params, err)
 		return 0, errcode.ListTagError
 	}
 
@@ -131,7 +133,7 @@ func (ts *TagService) UpdateTagStatus(request *UpdateTagStatusRequest) error {
 
 	result, err := tagDao.UpdateTagStatus(request.TagID, request.Status)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.UpdateTagStatus: update tag status fail: %v", err)
+		global.Logger.Errorf(ts.ctx, "TagService.UpdateTagStatus: update tag status fail, request is %v, err: %v", request, err)
 		return errcode.UpdateTagStatusError
 	}
 
