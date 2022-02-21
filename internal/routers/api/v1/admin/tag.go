@@ -3,6 +3,7 @@ package admin
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/scSZn/blog/conf"
+	"github.com/scSZn/blog/pkg/errcode"
 
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/service"
@@ -73,4 +74,29 @@ func TagStatus(ctx *gin.Context) {
 	response := app.NewResponse(ctx)
 
 	response.ReturnData(tagStatus)
+}
+
+func TagStatusModify(ctx *gin.Context) {
+	request := service.UpdateTagStatusRequest{}
+	response := app.NewResponse(ctx)
+	err := ctx.Bind(&request)
+	if err != nil {
+		response.ReturnError(errcode.BindError)
+		global.Logger.Errorf(ctx, "admin.TagStatusModify: bind error, err: %v", err)
+		return
+	}
+	err = ctx.BindUri(&request)
+	if err != nil {
+		response.ReturnError(errcode.BindError)
+		global.Logger.Errorf(ctx, "admin.TagStatusModify: bind error, err: %v", err)
+		return
+	}
+
+	svc := service.NewTagService(ctx)
+	err = svc.UpdateTagStatus(&request)
+	if err != nil {
+		response.ReturnError(err)
+		return
+	}
+	response.ReturnData("update tag status success")
 }

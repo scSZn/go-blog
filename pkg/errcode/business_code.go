@@ -10,4 +10,5 @@ var (
 	ListTagError         = NewError(3002, "list tag fail")
 	TagAlreadyExistError = NewError(3003, "tag already exist")
 	DeleteTagError       = NewError(3004, "删除标签失败")
+	UpdateTagStatusError = NewError(3005, "更新标签状态失败")
 )

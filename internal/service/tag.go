@@ -30,6 +30,11 @@ type ListTagRequest struct {
 	app.Pager
 }
 
+type UpdateTagStatusRequest struct {
+	TagID  string `json:"tag_id" uri:"tag_id"`
+	Status uint8  `json:"status"`
+}
+
 type TagService struct {
 	ctx context.Context
 	db  *gorm.DB
@@ -119,4 +124,21 @@ func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
 	}
 
 	return result, nil
+}
+
+func (ts *TagService) UpdateTagStatus(request *UpdateTagStatusRequest) error {
+	tagDao := dao.NewTagDAO(ts.db)
+
+	result, err := tagDao.UpdateTagStatus(request.TagID, request.Status)
+	if err != nil {
+		global.Logger.Errorf(ts.ctx, "TagService.UpdateTagStatus: update tag status fail: %v", err)
+		return errcode.UpdateTagStatusError
+	}
+
+	if result == 0 {
+		global.Logger.Errorf(ts.ctx, "TagService.UpdateTagStatus: update tag status fail, unknown error, row affected is 0, request is %+v", request)
+		return errcode.UpdateTagStatusError
+	}
+
+	return nil
 }

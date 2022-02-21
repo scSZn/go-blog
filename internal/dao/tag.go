@@ -112,3 +112,15 @@ func (d *TagDAO) GetTagByTagIDBatch(tagID ...string) ([]*model.Tag, error) {
 	}
 	return result, nil
 }
+
+func (d *TagDAO) UpdateTagStatus(tagID string, status uint8) (int64, error) {
+	db := d.db.Table(model.TagTableName).Where("tag_id = ?", tagID).Updates(&model.Tag{
+		Model: &model.Model{
+			Status: status,
+		},
+	})
+	if err := db.Error; err != nil {
+		return 0, errors.Wrap(err, "TagDAO.UpdateTag: update tag fail")
+	}
+	return db.RowsAffected, nil
+}
