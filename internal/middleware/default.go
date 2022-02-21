@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"bytes"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/scSZn/blog/global"
 	"io/ioutil"
@@ -25,12 +24,12 @@ func Default() gin.HandlerFunc {
 			request.Body = ioutil.NopCloser(bytes.NewReader(bodyData))
 		}
 
-		marshal, err := json.Marshal(args)
-		if err != nil {
-			global.Logger.Errorf(ctx, "middle default json marshal error, err: %v", err)
-			ctx.Next()
-		}
-		global.Logger.Infof(ctx, "request coming, message: %v", string(marshal))
+		//marshal, err := json.Marshal(args)
+		//if err != nil {
+		//		global.Logger.Errorf(ctx, "middle default json marshal error, err: %v", err)
+		//		ctx.Next()
+		//}
+		global.Logger.Infof(ctx, "request coming, message: %v", request)
 		ctx.Next()
 	}
 }

@@ -48,7 +48,7 @@ func DeleteTag(ctx *gin.Context) {
 
 func ListTag(ctx *gin.Context) {
 	request := service.ListTagRequest{}
-	err := ctx.Bind(&request)
+	err := ctx.BindQuery(&request)
 	if err != nil {
 		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %v", err)
 		return

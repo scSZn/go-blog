@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -24,10 +25,10 @@ type DeleteTagRequest struct {
 }
 
 type ListTagRequest struct {
-	TagName  string `json:"tag_name"`
-	OrderKey string `json:"order_key"`
-	Order    string `json:"order"`
-	Status   *uint8 `json:"status"`
+	TagName  string `json:"tag_name" form:"tag_name"`
+	OrderKey string `json:"order_key" form:"order_key"`
+	Order    string `json:"order" form:"order"`
+	Status   *uint8 `json:"status" form:"status"`
 	IsDel    *bool  `json:"-"`
 	app.Pager
 }
@@ -88,7 +89,7 @@ func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
 func (ts *TagService) ListTag(request *ListTagRequest) ([]*model.Tag, error) {
 	tagDao := dao.NewTagDAO(ts.db)
 	params := dao.ListTagParams{
-		TagName:  request.TagName,
+		TagName:  fmt.Sprintf("%%%s%%", request.TagName),
 		OrderKey: request.OrderKey,
 		Order:    request.Order,
 		Status:   request.Status,
@@ -102,7 +103,7 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*model.Tag, error) {
 		}
 	}
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail, params is %v, err: %v", params, err)
+		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail, params is %#v, err: %v", params, err)
 		return nil, errcode.ListTagError
 	}
 

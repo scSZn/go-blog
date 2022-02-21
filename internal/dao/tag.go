@@ -54,7 +54,7 @@ func (d *TagDAO) DeleteTag(tagID string) (int64, error) {
 func (d *TagDAO) ListTag(params *ListTagParams, pager *app.Pager) ([]*model.Tag, error) {
 	db := d.db.Table(model.TagTableName)
 	if params.TagName != "" {
-		db = db.Where("tag_name like %?%", params.TagName)
+		db = db.Where("tag_name like ?", params.TagName)
 	}
 	if params.Status != nil {
 		db = db.Where("status = ?", *(params.Status))
@@ -79,7 +79,7 @@ func (d *TagDAO) ListTag(params *ListTagParams, pager *app.Pager) ([]*model.Tag,
 func (d *TagDAO) CountTag(params *ListTagParams) (int64, error) {
 	db := d.db.Table(model.TagTableName)
 	if params.TagName != "" {
-		db = db.Where("tag_name like %?%", params.TagName)
+		db = db.Where("tag_name like ?", params.TagName)
 	}
 	if params.Status != nil {
 		db = db.Where("status = ?", *(params.Status))
