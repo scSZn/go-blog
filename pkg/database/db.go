@@ -13,7 +13,7 @@ import (
 )
 
 func NewEngine(setting *conf.DatabaseSetting) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=%s&parseTime=true",
+	dsn := fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=%s&parseTime=true&loc=Local",
 		setting.Username,
 		setting.Password,
 		setting.Protocol,
