@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/scSZn/blog/internal/middleware"
 	v1Admin "github.com/scSZn/blog/internal/routers/api/v1/admin"
 )
@@ -23,7 +24,7 @@ func NewRouter() *gin.Engine {
 		admin.GET("/tags", v1Admin.ListTag)
 		admin.GET("/tags/status", v1Admin.TagStatus)
 		admin.DELETE("/tags/:tag_id", v1Admin.DeleteTag)
-		admin.PUT("/tags/status/:tag_id", v1Admin.TagStatusModify)
+		admin.PUT("/tags/:tag_id", v1Admin.UpdateTag)
 
 		admin.GET("/info", v1Admin.Info)
 	}

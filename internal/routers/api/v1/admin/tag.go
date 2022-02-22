@@ -2,12 +2,12 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/scSZn/blog/conf"
-	"github.com/scSZn/blog/pkg/errcode"
 
+	"github.com/scSZn/blog/conf"
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/service"
 	"github.com/scSZn/blog/pkg/app"
+	"github.com/scSZn/blog/pkg/errcode"
 )
 
 func CreateTag(ctx *gin.Context) {
@@ -56,12 +56,7 @@ func ListTag(ctx *gin.Context) {
 
 	response := app.NewResponse(ctx)
 	svc := service.NewTagService(ctx)
-	data, err := svc.ListTag(&request)
-	if err != nil {
-		response.ReturnError(err)
-		return
-	}
-	total, err := svc.CountTag(&request)
+	data, total, err := svc.ListTag(&request)
 	if err != nil {
 		response.ReturnError(err)
 		return
@@ -76,24 +71,26 @@ func TagStatus(ctx *gin.Context) {
 	response.ReturnData(tagStatus)
 }
 
-func TagStatusModify(ctx *gin.Context) {
-	request := service.UpdateTagStatusRequest{}
+func UpdateTag(ctx *gin.Context) {
+	request := service.UpdateTagRequest{}
 	response := app.NewResponse(ctx)
+	// 绑定JSON
 	err := ctx.Bind(&request)
 	if err != nil {
 		response.ReturnError(errcode.BindError)
-		global.Logger.Errorf(ctx, "admin.TagStatusModify: bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.UpdateTag: bind error, err: %v", err)
 		return
 	}
+	// 绑定路径参数
 	err = ctx.BindUri(&request)
 	if err != nil {
 		response.ReturnError(errcode.BindError)
-		global.Logger.Errorf(ctx, "admin.TagStatusModify: bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.UpdateTag: bind error, err: %v", err)
 		return
 	}
 
 	svc := service.NewTagService(ctx)
-	err = svc.UpdateTagStatus(&request)
+	err = svc.UpdateTag(&request)
 	if err != nil {
 		response.ReturnError(err)
 		return

@@ -2,6 +2,9 @@ package consts
 
 type TraceKey string
 
+// 格式化日期字符串
+const TimeFormatLayout = "2006-01-02 15:04:05"
+
 // 环境信息
 const (
 	EnvDev  = "dev"

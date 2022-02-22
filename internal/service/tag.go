@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -10,6 +11,7 @@ import (
 	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/dao"
+	"github.com/scSZn/blog/internal/dto"
 	"github.com/scSZn/blog/internal/model"
 	"github.com/scSZn/blog/pkg/app"
 	"github.com/scSZn/blog/pkg/errcode"
@@ -33,9 +35,10 @@ type ListTagRequest struct {
 	app.Pager
 }
 
-type UpdateTagStatusRequest struct {
-	TagID  string `json:"tag_id" uri:"tag_id"`
-	Status uint8  `json:"status"`
+type UpdateTagRequest struct {
+	TagID   string `json:"tag_id" uri:"tag_id"`
+	Status  *uint8 `json:"status"`
+	TagName string `json:"tag_name"`
 }
 
 type TagService struct {
@@ -86,7 +89,7 @@ func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
 	return nil
 }
 
-func (ts *TagService) ListTag(request *ListTagRequest) ([]*model.Tag, error) {
+func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagVO, int64, error) {
 	tagDao := dao.NewTagDAO(ts.db)
 	params := dao.ListTagParams{
 		TagName:  fmt.Sprintf("%%%s%%", request.TagName),
@@ -96,18 +99,25 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*model.Tag, error) {
 		IsDel:    request.IsDel,
 	}
 
-	result, err := tagDao.ListTag(&params, &request.Pager)
-	for _, tag := range result {
+	tags, err := tagDao.ListTag(&params, &request.Pager)
+	if err != nil {
+		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail, params is %#v, err: %v", params, err)
+		return nil, 0, errcode.ListTagError
+	}
+	for _, tag := range tags {
 		if tag.IsDel {
 			tag.Status = consts.StatusDeleted
 		}
 	}
+	var result = dto.GenTagVOFromModelTag(tags)
+
+	total, err := tagDao.CountTag(&params)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail, params is %#v, err: %v", params, err)
-		return nil, errcode.ListTagError
+		global.Logger.Errorf(ts.ctx, "TagService.ListTag: count tag fail, params is %#v, err: %v", params, err)
+		return nil, 0, errcode.ListTagError
 	}
 
-	return result, nil
+	return result, total, nil
 }
 
 func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
@@ -129,18 +139,28 @@ func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
 	return result, nil
 }
 
-func (ts *TagService) UpdateTagStatus(request *UpdateTagStatusRequest) error {
+func (ts *TagService) UpdateTag(request *UpdateTagRequest) error {
 	tagDao := dao.NewTagDAO(ts.db)
 
-	result, err := tagDao.UpdateTagStatus(request.TagID, request.Status)
+	// 如果没有传入status，则默认修改为开启
+	var status uint8 = consts.StatusEnable
+	if request.Status == nil {
+		request.Status = &status
+	}
+
+	result, err := tagDao.UpdateTag(request.TagID, request.Status, request.TagName)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.UpdateTagStatus: update tag status fail, request is %v, err: %v", request, err)
-		return errcode.UpdateTagStatusError
+		if strings.Contains(strings.ToLower(err.Error()), "duplicate entry") {
+			global.Logger.Warnf(ts.ctx, "TagService.UpdateTag: update tag status fail, tag_name is already exists, request is %+v, err: %v", request, err)
+			return errcode.TagAlreadyExistError
+		}
+		global.Logger.Errorf(ts.ctx, "TagService.UpdateTag: update tag status fail, request is %v, err: %+v", request, err)
+		return errcode.UpdateTagError
 	}
 
 	if result == 0 {
-		global.Logger.Errorf(ts.ctx, "TagService.UpdateTagStatus: update tag status fail, unknown error, row affected is 0, request is %+v", request)
-		return errcode.UpdateTagStatusError
+		global.Logger.Errorf(ts.ctx, "TagService.UpdateTag: update tag status fail, unknown error, row affected is 0, request is %+v", request)
+		return errcode.UpdateTagError
 	}
 
 	return nil

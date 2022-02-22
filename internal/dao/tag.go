@@ -3,12 +3,15 @@ package dao
 import (
 	"database/sql"
 	"fmt"
+	"strings"
+
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+
 	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/internal/model"
 	"github.com/scSZn/blog/pkg/app"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type ListTagParams struct {
@@ -113,12 +116,18 @@ func (d *TagDAO) GetTagByTagIDBatch(tagID ...string) ([]*model.Tag, error) {
 	return result, nil
 }
 
-func (d *TagDAO) UpdateTagStatus(tagID string, status uint8) (int64, error) {
-	db := d.db.Table(model.TagTableName).Where("tag_id = ?", tagID).Updates(&model.Tag{
-		Model: &model.Model{
-			Status: status,
-		},
-	})
+func (d *TagDAO) UpdateTag(tagID string, status *uint8, newTagName string) (int64, error) {
+	params := map[string]interface{}{
+		"is_del": 0,
+	}
+	if status != nil {
+		params["status"] = *status
+	}
+	newTagName = strings.TrimSpace(newTagName)
+	if newTagName != "" {
+		params["tag_name"] = newTagName
+	}
+	db := d.db.Table(model.TagTableName).Where("tag_id = ?", tagID).Updates(params)
 	if err := db.Error; err != nil {
 		return 0, errors.Wrap(err, "TagDAO.UpdateTag: update tag fail")
 	}
