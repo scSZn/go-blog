@@ -1,7 +1,7 @@
 package errcode
 
 var (
-	LoginFail = NewError(1001, "login fail, username or password error")
+	LoginFail = NewError(1001, "登录失败，用户名或密码错误")
 
 	CreateArticleError = NewError(2001, "create article fail")
 	ListArticleError   = NewError(2002, "list article fail")

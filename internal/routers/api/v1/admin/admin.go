@@ -19,14 +19,14 @@ func Login(ctx *gin.Context) {
 	}
 
 	svc := service.NewLoginService(ctx)
-	err = svc.Login(request)
+	token, err := svc.Login(request)
 	if err != nil {
 		global.Logger.Errorf(ctx, "admin.Login: login fail: %v", err)
 		response.ReturnError(errcode.LoginFail)
 		return
 	}
 
-	response.ReturnData("12345678")
+	response.ReturnData(token)
 }
 
 func Info(ctx *gin.Context) {
