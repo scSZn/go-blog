@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/scSZn/blog/pkg/errcode"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -13,6 +12,7 @@ import (
 	"github.com/scSZn/blog/internal/dto"
 	"github.com/scSZn/blog/internal/model"
 	"github.com/scSZn/blog/pkg/app"
+	"github.com/scSZn/blog/pkg/errcode"
 	"github.com/scSZn/blog/pkg/set"
 )
 

@@ -4,13 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"encoding/hex"
+
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/dao"
 	"github.com/scSZn/blog/pkg/errcode"
 	"github.com/scSZn/blog/pkg/util"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type LoginRequest struct {

@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
+
 	"github.com/scSZn/blog/conf"
 	"github.com/scSZn/blog/pkg/app"
-	"strings"
 )
 
 const originHeaderKey = "Origin"

@@ -3,7 +3,6 @@ package dao
 import (
 	"context"
 	"database/sql"
-	"github.com/scSZn/blog/pkg/app"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/model"
+	"github.com/scSZn/blog/pkg/app"
 )
 
 type ListArticleParams struct {

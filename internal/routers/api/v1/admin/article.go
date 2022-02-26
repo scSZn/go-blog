@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/service"
 	"github.com/scSZn/blog/pkg/app"

@@ -1,9 +1,11 @@
 package app
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/scSZn/blog/pkg/errcode"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/scSZn/blog/pkg/errcode"
 )
 
 type Response struct {

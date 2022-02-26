@@ -2,9 +2,10 @@ package dao
 
 import (
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
+
 	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/internal/model"
-	"gorm.io/gorm"
 )
 
 type TagArticleDAO struct {
