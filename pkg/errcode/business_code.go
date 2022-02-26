@@ -5,6 +5,7 @@ var (
 
 	CreateArticleError = NewError(2001, "create article fail")
 	ListArticleError   = NewError(2002, "list article fail")
+	CountArticleError  = NewError(2003, "统计文章总数失败")
 
 	CreateTagError       = NewError(3001, "create tag fail")
 	ListTagError         = NewError(3002, "list tag fail")

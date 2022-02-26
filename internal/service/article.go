@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/scSZn/blog/pkg/errcode"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -64,33 +65,32 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 	err := articleDao.CreateArticle(article)
 	if err != nil {
 		tx.Rollback()
-		return errors.Wrap(err, "ArticleService.CreateArticle: create article fail")
-	}
-
-	if err != nil {
-		tx.Rollback()
-		return errors.Wrap(err, "ArticleService.CreateArticle: create article ext fail")
+		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create article fail, request is %+v, err: %+v", request, err)
+		return errcode.CreateArticleError
 	}
 
 	// 创建文章与标签的关联关系
-	err = tagArticleDao.CreateTagArticleBatch(article.ArticleID, request.TagIDs...)
+	err = tagArticleDao.CreateTagArticleBatch(article.ArticleID, request.TagIDs)
 	if err != nil {
 		tx.Rollback()
-		return errors.Wrap(err, "ArticleService.CreateArticle: create tag article relationship fail")
+		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create tag article relationship fail, request is %+v, err: %+v", request, err)
+		return errcode.CreateArticleError
 	}
 
 	// 更新标签的文章数量
 	err = tagDao.AddCount(request.TagIDs)
 	if err != nil {
 		tx.Rollback()
-		return errors.Wrap(err, "ArticleService.CreateArticle: update tag count fail")
+		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: update tag count fail, request is %+v, err: %+v", request, err)
+		return errcode.CreateArticleError
 	}
 
 	// 提交事务
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
-		return errors.Wrap(err, "ArticleService.CreateArticle: commit fail")
+		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: commit fail, request is %+v, err: %+v", request, err)
+		return errcode.CreateArticleError
 	}
 	return nil
 }
@@ -115,7 +115,8 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 	// 获取符合条件的文章
 	articles, err := articleDao.List(listParam, request.Pager)
 	if err != nil {
-		return nil, errors.Wrap(err, "ArticleService.List: query articles fail")
+		global.Logger.Errorf(as.ctx, "ArticleService.List: query articles fail, request is %+v, err: %+v", request, err)
+		return nil, errcode.ListArticleError
 	}
 
 	// 组装文章ID
@@ -125,7 +126,7 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 	}
 
 	// 根据文章ID批量获取标签文章关联关系，并使用集合过滤
-	tagArticles, err := tagArticleDao.GetTagIDsByArticleIDBatch(articleIDs...)
+	tagArticles, err := tagArticleDao.GetTagIDsByArticleIDBatch(articleIDs)
 	tagIDSet := set.NewStringSet()
 	for _, tagArticle := range tagArticles {
 		tagIDSet.Add(tagArticle.TagID)
@@ -143,9 +144,10 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 	}
 
 	// 批量获取标签信息
-	tags, err := tagDao.GetTagByTagIDBatch(tagIDSet.Elements()...)
+	tags, err := tagDao.GetTagByTagIDBatch(tagIDSet.Elements())
 	if err != nil {
-		return nil, errors.Wrap(err, "ArticleService.List: query tag fail")
+		global.Logger.Errorf(as.ctx, "ArticleService.List: query tag fail, request is %+v, err: %+v", request, err)
+		return nil, errcode.ListArticleError
 	}
 
 	// 将标签信息封装成map，方便查找
@@ -179,6 +181,7 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 // Count 获取符合条件的文章数量
 // request.Status 是否需要根据状态值来筛选文章
 // request.IsDel 是否需要获取已被软删除的文章
+// todo；合并到List函数中
 func (as *ArticleService) Count(request *ListArticleRequest) (int64, error) {
 
 	articleDao := dao.NewArticleDAO(as.db)

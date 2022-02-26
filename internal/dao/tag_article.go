@@ -18,7 +18,7 @@ func NewTagArticleDAO(db *gorm.DB) *TagArticleDAO {
 }
 
 // CreateTagArticleBatch 为一个文章创建多个标签关联关系
-func (d *TagArticleDAO) CreateTagArticleBatch(articleID string, tagIDs ...string) error {
+func (d *TagArticleDAO) CreateTagArticleBatch(articleID string, tagIDs []string) error {
 	if len(tagIDs) == 0 {
 		return nil
 	}
@@ -46,7 +46,7 @@ func (d *TagArticleDAO) GetTagIDsByArticleID(articleID string) ([]*model.TagArti
 }
 
 // GetTagIDsByArticleIDBatch 批量获取articleID文章的所有关联信息
-func (d *TagArticleDAO) GetTagIDsByArticleIDBatch(articleIDs ...string) ([]*model.TagArticle, error) {
+func (d *TagArticleDAO) GetTagIDsByArticleIDBatch(articleIDs []string) ([]*model.TagArticle, error) {
 	var result []*model.TagArticle
 	db := d.db.Table(model.TagArticleTableName).Where("article_id in ? AND is_del = ?", articleIDs, consts.NoDelStatus).Scan(&result)
 	if err := db.Error; err != nil {

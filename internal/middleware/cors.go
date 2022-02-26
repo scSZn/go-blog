@@ -30,6 +30,7 @@ func CORS() gin.HandlerFunc {
 		if ctx.Request.Method == "OPTIONS" {
 			response := app.NewResponse(ctx)
 			response.ReturnData("Success")
+			ctx.Abort()
 			return
 		}
 

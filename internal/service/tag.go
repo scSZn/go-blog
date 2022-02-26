@@ -66,7 +66,7 @@ func (ts *TagService) CreateTag(request *CreateTagRequest) error {
 
 	rowAffected, err := tagDao.CreateTag(tag)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.CreateTag: create tag fail, request is %v, err: %v", request, err)
+		global.Logger.Errorf(ts.ctx, "TagService.CreateTag: create tag fail, request is %v, err: %+v", request, err)
 		return errcode.CreateTagError
 	}
 
@@ -82,7 +82,7 @@ func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
 
 	_, err := tagDao.DeleteTag(request.TagID)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.DeleteTag: delete tag fail, tag_id is %v, err: %v", request.TagID, err)
+		global.Logger.Errorf(ts.ctx, "TagService.DeleteTag: delete tag fail, tag_id is %v, err: %+v", request.TagID, err)
 		return errcode.DeleteTagError
 	}
 
@@ -101,7 +101,7 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagVO, int64, err
 
 	tags, err := tagDao.ListTag(&params, &request.Pager)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail, params is %#v, err: %v", params, err)
+		global.Logger.Errorf(ts.ctx, "TagService.ListTag: list tag fail, params is %+v, err: %+v", params, err)
 		return nil, 0, errcode.ListTagError
 	}
 	for _, tag := range tags {
@@ -113,7 +113,7 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagVO, int64, err
 
 	total, err := tagDao.CountTag(&params)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.ListTag: count tag fail, params is %#v, err: %v", params, err)
+		global.Logger.Errorf(ts.ctx, "TagService.ListTag: count tag fail, params is %+v, err: %+v", params, err)
 		return nil, 0, errcode.ListTagError
 	}
 
@@ -132,7 +132,7 @@ func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
 
 	result, err := tagDao.CountTag(&params)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, "TagService.CountTag: count tag fail, params is %v, err: %v", params, err)
+		global.Logger.Errorf(ts.ctx, "TagService.CountTag: count tag fail, params is %+v, err: %+v", params, err)
 		return 0, errcode.ListTagError
 	}
 
@@ -151,10 +151,10 @@ func (ts *TagService) UpdateTag(request *UpdateTagRequest) error {
 	result, err := tagDao.UpdateTag(request.TagID, request.Status, request.TagName)
 	if err != nil {
 		if strings.Contains(strings.ToLower(err.Error()), "duplicate entry") {
-			global.Logger.Warnf(ts.ctx, "TagService.UpdateTag: update tag status fail, tag_name is already exists, request is %+v, err: %v", request, err)
+			global.Logger.Warnf(ts.ctx, "TagService.UpdateTag: update tag status fail, tag_name is already exists, request is %+v, err: %+v", request, err)
 			return errcode.TagAlreadyExistError
 		}
-		global.Logger.Errorf(ts.ctx, "TagService.UpdateTag: update tag status fail, request is %v, err: %+v", request, err)
+		global.Logger.Errorf(ts.ctx, "TagService.UpdateTag: update tag status fail, request is %+v, err: %+v", request, err)
 		return errcode.UpdateTagError
 	}
 

@@ -12,13 +12,15 @@ import (
 
 func CreateTag(ctx *gin.Context) {
 	request := service.CreateTagRequest{}
+	response := app.NewResponse(ctx)
+
 	err := ctx.Bind(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %+v", err)
+		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
 
-	response := app.NewResponse(ctx)
 	svc := service.NewTagService(ctx)
 	err = svc.CreateTag(&request)
 	if err != nil {
@@ -30,13 +32,15 @@ func CreateTag(ctx *gin.Context) {
 
 func DeleteTag(ctx *gin.Context) {
 	request := service.DeleteTagRequest{}
+	response := app.NewResponse(ctx)
+
 	err := ctx.BindUri(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %+v", err)
+		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
 
-	response := app.NewResponse(ctx)
 	svc := service.NewTagService(ctx)
 	err = svc.DeleteTag(&request)
 	if err != nil {
@@ -48,13 +52,15 @@ func DeleteTag(ctx *gin.Context) {
 
 func ListTag(ctx *gin.Context) {
 	request := service.ListTagRequest{}
+	response := app.NewResponse(ctx)
+
 	err := ctx.BindQuery(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.CreateTag: bind error, err: %+v", err)
+		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
 
-	response := app.NewResponse(ctx)
 	svc := service.NewTagService(ctx)
 	data, total, err := svc.ListTag(&request)
 	if err != nil {
@@ -67,7 +73,6 @@ func ListTag(ctx *gin.Context) {
 func TagStatus(ctx *gin.Context) {
 	tagStatus := conf.GetSetting().TagStatus
 	response := app.NewResponse(ctx)
-
 	response.ReturnData(tagStatus)
 }
 
@@ -78,14 +83,14 @@ func UpdateTag(ctx *gin.Context) {
 	err := ctx.Bind(&request)
 	if err != nil {
 		response.ReturnError(errcode.ClientRequestError)
-		global.Logger.Errorf(ctx, "admin.UpdateTag: bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.UpdateTag: bind error, err: %+v", err)
 		return
 	}
 	// 绑定路径参数
 	err = ctx.BindUri(&request)
 	if err != nil {
 		response.ReturnError(errcode.ClientRequestError)
-		global.Logger.Errorf(ctx, "admin.UpdateTag: bind error, err: %v", err)
+		global.Logger.Errorf(ctx, "admin.UpdateTag: bind error, err: %+v", err)
 		return
 	}
 

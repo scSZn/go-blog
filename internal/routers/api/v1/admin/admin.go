@@ -12,9 +12,10 @@ import (
 func Login(ctx *gin.Context) {
 	request := &service.LoginRequest{}
 	response := app.NewResponse(ctx)
+
 	err := ctx.Bind(request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "admin.Login: bind error: %v", err)
+		global.Logger.Errorf(ctx, "admin.Login: bind error: %+v", err)
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
@@ -22,7 +23,7 @@ func Login(ctx *gin.Context) {
 	svc := service.NewLoginService(ctx)
 	token, err := svc.Login(request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "admin.Login: login fail: %v", err)
+		global.Logger.Errorf(ctx, "admin.Login: login fail: %+v", err)
 		response.ReturnError(errcode.LoginFail)
 		return
 	}
