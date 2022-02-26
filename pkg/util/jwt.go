@@ -3,7 +3,7 @@ package util
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/pkg/errors"
 	"github.com/scSZn/blog/internal/model"
 	"time"

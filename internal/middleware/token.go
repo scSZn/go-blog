@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/scSZn/blog/global"
+	"github.com/golang-jwt/jwt"
 
+	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/pkg/app"
 	"github.com/scSZn/blog/pkg/errcode"
 	"github.com/scSZn/blog/pkg/util"
