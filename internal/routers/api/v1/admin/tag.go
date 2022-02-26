@@ -77,14 +77,14 @@ func UpdateTag(ctx *gin.Context) {
 	// 绑定JSON
 	err := ctx.Bind(&request)
 	if err != nil {
-		response.ReturnError(errcode.BindError)
+		response.ReturnError(errcode.ClientRequestError)
 		global.Logger.Errorf(ctx, "admin.UpdateTag: bind error, err: %v", err)
 		return
 	}
 	// 绑定路径参数
 	err = ctx.BindUri(&request)
 	if err != nil {
-		response.ReturnError(errcode.BindError)
+		response.ReturnError(errcode.ClientRequestError)
 		global.Logger.Errorf(ctx, "admin.UpdateTag: bind error, err: %v", err)
 		return
 	}

@@ -54,7 +54,7 @@ func GenerateToken(user *model.User) (string, error) {
 
 func ValidToken(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return privateKey, nil
+		return publicKey, nil
 	})
 	if tokenClaims != nil {
 		claims, ok := tokenClaims.Claims.(*Claims)

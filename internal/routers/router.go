@@ -15,7 +15,7 @@ func NewRouter() *gin.Engine {
 
 	admin := apiV1.Group("/admin")
 	admin.POST("/login", v1Admin.Login)
-	admin.Use()
+	admin.Use(middleware.TokenVerify())
 	{
 		admin.POST("/articles", v1Admin.CreateArticle)
 		admin.GET("/articles", v1Admin.ListArticleAdmin)
