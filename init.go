@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/scSZn/blog/pkg/casbin"
 	"log"
 
 	"github.com/scSZn/blog/conf"
@@ -20,4 +21,10 @@ func Init() {
 	if err != nil {
 		log.Fatalf("[main.Init] db init fail, err: %v", err)
 	}
+
+	global.Enforcer, err = casbin.NewEnforcer()
+	if err != nil {
+		log.Fatalf("[main.Init] casbin enforcer init fail, err: %v", err)
+	}
+
 }

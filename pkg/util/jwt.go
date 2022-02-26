@@ -19,6 +19,7 @@ type Claims struct {
 	Uid      string `json:"uid"`
 	Username string `json:"username"`
 	Nickname string `json:"nickname"`
+	Role     string `json:"role"`
 }
 
 var privateKey, publicKey = genRsaKey()
@@ -44,6 +45,7 @@ func GenerateToken(user *model.User) (string, error) {
 		Uid:      user.Uid,
 		Username: user.Username,
 		Nickname: user.Nickname,
+		Role:     user.Role,
 	})
 
 	signedString, err := claims.SignedString(privateKey)

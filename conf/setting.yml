@@ -2,6 +2,7 @@ env: dev
 app:
   host: localhost
   port: 8080
+  casbinModel: ./conf/casbin_model.conf
   allowOrigins:
     - http://localhost:8081
 log:

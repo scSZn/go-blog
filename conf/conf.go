@@ -51,6 +51,7 @@ type Setting struct {
 type AppSetting struct {
 	Host         string
 	Port         string
+	CasbinModel  string
 	AllowOrigins []string `json:"allow_origins"`
 }
 
