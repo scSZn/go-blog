@@ -3,17 +3,19 @@ package util
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"github.com/golang-jwt/jwt"
-	"github.com/pkg/errors"
-	"github.com/scSZn/blog/internal/model"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/pkg/errors"
+
+	"github.com/scSZn/blog/internal/model"
 )
 
 const TokenValidTime = 24 * time.Hour
 const Issuer = "scSZn"
 
 type Claims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	Uid      string `json:"uid"`
 	Username string `json:"username"`
 	Nickname string `json:"nickname"`
@@ -34,9 +36,9 @@ func genRsaKey() (*rsa.PrivateKey, *rsa.PublicKey) {
 
 func GenerateToken(user *model.User) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodRS256, &Claims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(TokenValidTime).Unix(),
-			IssuedAt:  time.Now().Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenValidTime)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    Issuer,
 		},
 		Uid:      user.Uid,
