@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/scSZn/blog/conf"
 
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/service"
@@ -53,4 +54,10 @@ func ListArticleAdmin(ctx *gin.Context) {
 		return
 	}
 	response.ReturnList(articles, request.Pager, total)
+}
+
+func ArticleStatus(ctx *gin.Context) {
+	articleStatus := conf.GetSetting().ArticleStatus
+	response := app.NewResponse(ctx)
+	response.ReturnData(articleStatus)
 }

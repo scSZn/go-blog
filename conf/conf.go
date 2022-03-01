@@ -24,6 +24,7 @@ func init() {
 		v.RegisterAlias("logsetting", "log")
 		v.RegisterAlias("appsetting", "app")
 		v.RegisterAlias("tagstatus", "status.tag")
+		v.RegisterAlias("articlestatus", "status.article")
 
 		err := v.ReadInConfig()
 		if err != nil {
@@ -41,11 +42,12 @@ func GetSetting() *Setting {
 }
 
 type Setting struct {
-	Env        string
-	AppSetting *AppSetting
-	LogSetting *LogSetting
-	DBSetting  *DatabaseSetting
-	TagStatus  []Status
+	Env           string
+	AppSetting    *AppSetting
+	LogSetting    *LogSetting
+	DBSetting     *DatabaseSetting
+	TagStatus     []Status
+	ArticleStatus []Status
 }
 
 type AppSetting struct {
