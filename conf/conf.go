@@ -21,6 +21,7 @@ func init() {
 		v.AddConfigPath("./conf")
 		v.SetConfigName("setting")
 		v.RegisterAlias("dbsetting", "database")
+		v.RegisterAlias("cossetting", "cos")
 		v.RegisterAlias("logsetting", "log")
 		v.RegisterAlias("appsetting", "app")
 		v.RegisterAlias("tagstatus", "status.tag")
@@ -29,6 +30,12 @@ func init() {
 		err := v.ReadInConfig()
 		if err != nil {
 			log.Fatalf("read conf fail, err: %v", err)
+		}
+
+		v.SetConfigName("secret")
+		err = v.MergeInConfig()
+		if err != nil {
+			log.Fatalf("merge conf fail, err: %v", err)
 		}
 		err = v.Unmarshal(&setting)
 		if err != nil {
@@ -46,6 +53,7 @@ type Setting struct {
 	AppSetting    *AppSetting
 	LogSetting    *LogSetting
 	DBSetting     *DatabaseSetting
+	COSSetting    *COSSetting
 	TagStatus     []Status
 	ArticleStatus []Status
 }
@@ -73,6 +81,13 @@ type DatabaseSetting struct {
 	Dbname   string
 	Charset  string
 	Protocol string
+}
+
+type COSSetting struct {
+	AppID     string
+	SecretID  string
+	SecretKey string
+	BaseURL   string
 }
 
 type Status struct {

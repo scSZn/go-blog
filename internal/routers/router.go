@@ -28,6 +28,7 @@ func NewRouter() *gin.Engine {
 		admin.PUT("/tags/:tag_id", v1Admin.UpdateTag)
 
 		admin.GET("/info", v1Admin.Info)
+		admin.POST("/uploadImage", v1Admin.UploadImage)
 	}
 	return router
 }

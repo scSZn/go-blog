@@ -35,3 +35,5 @@ const (
 
 // TokenHeaderKey 登录Token
 const TokenHeaderKey = "token"
+
+const MaxUploadSize = 1024 * 1024 * 10

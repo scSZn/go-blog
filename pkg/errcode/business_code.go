@@ -1,7 +1,9 @@
 package errcode
 
 var (
-	LoginFail = NewError(1001, "登录失败，用户名或密码错误")
+	LoginFail           = NewError(1001, "登录失败，用户名或密码错误")
+	UploadFail          = NewError(1002, "上传图片失败")
+	UploadExceedMaxSize = NewError(1003, "上传图片大小不得超过10M")
 
 	CreateArticleError = NewError(2001, "create article fail")
 	ListArticleError   = NewError(2002, "list article fail")
