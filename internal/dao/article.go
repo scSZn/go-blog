@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"github.com/scSZn/blog/consts"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -14,11 +15,11 @@ import (
 )
 
 type ListArticleParams struct {
-	TitleLike  string
-	AuthorLike string
-	TagIDs     []string
-	Status     uint8
-	IsDel      *bool
+	TitleLike     string
+	AuthorLike    string
+	TagIDs        []string
+	Status        *uint8
+	ContainDelete bool
 }
 
 type ArticleDAO struct {
@@ -69,11 +70,15 @@ func (a *ArticleDAO) List(params *ListArticleParams, pager app.Pager) ([]*model.
 	if len(params.TagIDs) > 0 {
 		db = db.Where("tag_id in %s", params.TagIDs)
 	}
-	if params.Status != 0 {
-		db = db.Where("status = ?", params.Status)
+	if !params.ContainDelete && params.Status != nil && *params.Status != consts.StatusDeleted {
+		db = db.Where("is_del = ?", consts.NoDelStatus)
 	}
-	if params.IsDel != nil {
-		db = db.Where("is_del = ?", *(params.IsDel))
+	if params.Status != nil {
+		if *params.Status == consts.StatusDeleted {
+			db = db.Where("is_del = ?", consts.DelStatus)
+		} else {
+			db = db.Where("status = ?", params.Status)
+		}
 	}
 
 	db = db.Offset(pager.GetOffset()).Limit(pager.GetLimit())
@@ -101,11 +106,15 @@ func (a *ArticleDAO) Count(params *ListArticleParams) (int64, error) {
 	if len(params.TagIDs) > 0 {
 		db = db.Where("tag_id in %s", params.TagIDs)
 	}
-	if params.Status != 0 {
-		db = db.Where("status = ?", params.Status)
+	if !params.ContainDelete && params.Status != nil && *params.Status != consts.StatusDeleted {
+		db = db.Where("is_del = ?", consts.NoDelStatus)
 	}
-	if params.IsDel != nil {
-		db = db.Where("is_del = ?", *(params.IsDel))
+	if params.Status != nil {
+		if *params.Status == consts.StatusDeleted {
+			db = db.Where("is_del = ?", consts.DelStatus)
+		} else {
+			db = db.Where("status = ?", params.Status)
+		}
 	}
 
 	var count int64

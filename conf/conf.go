@@ -76,9 +76,9 @@ type DatabaseSetting struct {
 }
 
 type Status struct {
-	Value   int
-	Name    string
-	Display string
+	Value   int    `json:"value"`
+	Name    string `json:"name"`
+	Display string `json:"display"`
 }
 
 func GetEnv() string {

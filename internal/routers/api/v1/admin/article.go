@@ -31,7 +31,7 @@ func CreateArticle(ctx *gin.Context) {
 	response.ReturnData("create article success")
 }
 
-func ListArticleAdmin(ctx *gin.Context) {
+func ListArticle(ctx *gin.Context) {
 	request := service.ListArticleRequest{}
 	response := app.NewResponse(ctx)
 
@@ -43,12 +43,7 @@ func ListArticleAdmin(ctx *gin.Context) {
 	}
 
 	svc := service.NewArticleService(ctx)
-	total, err := svc.Count(&request)
-	if err != nil {
-		response.ReturnError(err)
-		return
-	}
-	articles, err := svc.List(&request)
+	articles, total, err := svc.List(&request)
 	if err != nil {
 		response.ReturnError(err)
 		return

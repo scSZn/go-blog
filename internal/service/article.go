@@ -26,11 +26,11 @@ type CreateArticleRequest struct {
 }
 
 type ListArticleRequest struct {
-	Title  string   `json:"title" form:"title"`
-	TagIDs []string `json:"tag_ids" form:"tag_ids"`
-	Author string   `json:"author" form:"author"` // todo: 采用多选的形式？？
-	Status uint8    `json:"status" form:"status"` // 状态值，内部使用（1：草稿，2：发布，3：禁用，4：删除）
-	IsDel  *bool    `json:"-"`
+	Title         string   `json:"title" form:"title"`
+	TagIDs        []string `json:"tag_ids" form:"tag_ids"`
+	Author        string   `json:"author" form:"author"` // todo: 采用多选的形式？？
+	Status        *uint8   `json:"status" form:"status"`
+	ContainDelete bool     `json:"contain_delete" form:"contain_delete"`
 	app.Pager
 }
 
@@ -98,25 +98,31 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 // List 获取文章列表
 // request.Status 是否需要根据状态值来筛选文章
 // request.IsDel 是否需要获取已被软删除的文章
-func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseInfo, error) {
+func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseInfo, int64, error) {
 
 	articleDao := dao.NewArticleDAO(as.db)
 	tagArticleDao := dao.NewTagArticleDAO(as.db)
 	tagDao := dao.NewTagDAO(as.db)
 
 	listParam := &dao.ListArticleParams{
-		TitleLike:  request.Title,
-		AuthorLike: request.Author,
-		TagIDs:     request.TagIDs,
-		Status:     request.Status,
-		IsDel:      request.IsDel,
+		TitleLike:     request.Title,
+		AuthorLike:    request.Author,
+		TagIDs:        request.TagIDs,
+		Status:        request.Status,
+		ContainDelete: request.ContainDelete,
+	}
+
+	total, err := articleDao.Count(listParam)
+	if err != nil {
+		global.Logger.Errorf(as.ctx, "ArticleService.List: query articles total fail, request is %+v, err: %+v", request, err)
+		return nil, 0, errcode.ListArticleError
 	}
 
 	// 获取符合条件的文章
 	articles, err := articleDao.List(listParam, request.Pager)
 	if err != nil {
 		global.Logger.Errorf(as.ctx, "ArticleService.List: query articles fail, request is %+v, err: %+v", request, err)
-		return nil, errcode.ListArticleError
+		return nil, 0, errcode.ListArticleError
 	}
 
 	// 组装文章ID
@@ -147,7 +153,7 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 	tags, err := tagDao.GetTagByTagIDBatch(tagIDSet.Elements())
 	if err != nil {
 		global.Logger.Errorf(as.ctx, "ArticleService.List: query tag fail, request is %+v, err: %+v", request, err)
-		return nil, errcode.ListArticleError
+		return nil, 0, errcode.ListArticleError
 	}
 
 	// 将标签信息封装成map，方便查找
@@ -175,7 +181,7 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 		result = append(result, articleBaseInfo)
 	}
 
-	return result, nil
+	return result, total, nil
 }
 
 // Count 获取符合条件的文章数量
@@ -183,7 +189,6 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 // request.IsDel 是否需要获取已被软删除的文章
 // todo；合并到List函数中
 func (as *ArticleService) Count(request *ListArticleRequest) (int64, error) {
-
 	articleDao := dao.NewArticleDAO(as.db)
 
 	listParam := &dao.ListArticleParams{

@@ -46,6 +46,6 @@ status:
     - value: 40
       name: forbidden
       display: 禁用
-    - value: 50,
+    - value: 50
       name: deleted
       display: 已删除

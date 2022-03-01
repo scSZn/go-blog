@@ -18,7 +18,7 @@ func NewRouter() *gin.Engine {
 	admin.Use(middleware.PermissionVerify())
 	{
 		admin.POST("/articles", v1Admin.CreateArticle)
-		admin.GET("/articles", v1Admin.ListArticleAdmin)
+		admin.GET("/articles", v1Admin.ListArticle)
 		admin.GET("/articles/status", v1Admin.ArticleStatus)
 
 		admin.POST("/tags", v1Admin.CreateTag)
