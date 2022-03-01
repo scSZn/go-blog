@@ -15,11 +15,11 @@ import (
 )
 
 type ListTagParams struct {
-	TagName  string
-	IsDel    *bool
-	Status   *uint8
-	OrderKey string
-	Order    string
+	TagName       string
+	ContainDelete bool
+	Status        *uint8
+	OrderKey      string
+	Order         string
 }
 
 type TagDAO struct {
@@ -62,8 +62,8 @@ func (d *TagDAO) ListTag(params *ListTagParams, pager *app.Pager) ([]*model.Tag,
 	if params.Status != nil {
 		db = db.Where("status = ?", *(params.Status))
 	}
-	if params.IsDel != nil {
-		db = db.Where("is_del = ?", *(params.IsDel))
+	if !params.ContainDelete {
+		db = db.Where("is_del = ?", consts.NoDelStatus)
 	}
 	if params.OrderKey != "" && params.Order != "" {
 		db = db.Order(fmt.Sprintf("%s %s", params.OrderKey, params.Order))
@@ -87,8 +87,8 @@ func (d *TagDAO) CountTag(params *ListTagParams) (int64, error) {
 	if params.Status != nil {
 		db = db.Where("status = ?", *(params.Status))
 	}
-	if params.IsDel != nil {
-		db = db.Where("is_del = ?", *(params.IsDel))
+	if !params.ContainDelete {
+		db = db.Where("is_del = ?", consts.NoDelStatus)
 	}
 	var result int64
 	if err := db.Count(&result).Error; err != nil && err != sql.ErrNoRows {

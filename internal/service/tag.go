@@ -27,11 +27,11 @@ type DeleteTagRequest struct {
 }
 
 type ListTagRequest struct {
-	TagName  string `json:"tag_name" form:"tag_name"`
-	OrderKey string `json:"order_key" form:"order_key"`
-	Order    string `json:"order" form:"order"`
-	Status   *uint8 `json:"status" form:"status"`
-	IsDel    *bool  `json:"-"`
+	TagName       string `json:"tag_name" form:"tag_name"`
+	OrderKey      string `json:"order_key" form:"order_key"`
+	Order         string `json:"order" form:"order"`
+	Status        *uint8 `json:"status" form:"status"`
+	ContainDelete bool   `json:"ContainDelete" form:"contain_delete"`
 	app.Pager
 }
 
@@ -91,12 +91,13 @@ func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
 
 func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagVO, int64, error) {
 	tagDao := dao.NewTagDAO(ts.db)
+
 	params := dao.ListTagParams{
-		TagName:  fmt.Sprintf("%%%s%%", request.TagName),
-		OrderKey: request.OrderKey,
-		Order:    request.Order,
-		Status:   request.Status,
-		IsDel:    request.IsDel,
+		TagName:       fmt.Sprintf("%%%s%%", request.TagName),
+		OrderKey:      request.OrderKey,
+		Order:         request.Order,
+		Status:        request.Status,
+		ContainDelete: request.ContainDelete, // 是否包含删除的数据
 	}
 
 	tags, err := tagDao.ListTag(&params, &request.Pager)
@@ -123,11 +124,11 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagVO, int64, err
 func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
 	tagDao := dao.NewTagDAO(ts.db)
 	params := dao.ListTagParams{
-		TagName:  request.TagName,
-		OrderKey: request.OrderKey,
-		Order:    request.Order,
-		Status:   request.Status,
-		IsDel:    request.IsDel,
+		TagName:       request.TagName,
+		OrderKey:      request.OrderKey,
+		Order:         request.Order,
+		Status:        request.Status,
+		ContainDelete: request.ContainDelete,
 	}
 
 	result, err := tagDao.CountTag(&params)
