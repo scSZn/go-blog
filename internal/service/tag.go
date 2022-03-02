@@ -89,7 +89,7 @@ func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
 	return nil
 }
 
-func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagVO, int64, error) {
+func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagInfo, int64, error) {
 	tagDao := dao.NewTagDAO(ts.db)
 
 	params := dao.ListTagParams{
@@ -110,7 +110,7 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagVO, int64, err
 			tag.Status = consts.StatusDeleted
 		}
 	}
-	var result = dto.GenTagVOFromModelTag(tags)
+	var result = dto.GenTagInfoFromModelTag(tags)
 
 	total, err := tagDao.CountTag(&params)
 	if err != nil {
