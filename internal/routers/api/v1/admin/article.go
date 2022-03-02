@@ -23,12 +23,12 @@ func CreateArticle(ctx *gin.Context) {
 	}
 
 	svc := service.NewArticleService(ctx)
-	err = svc.CreateArticle(&request)
+	article, err := svc.CreateArticle(&request)
 	if err != nil {
 		response.ReturnError(err)
 		return
 	}
-	response.ReturnData("create article success")
+	response.ReturnData(article)
 }
 
 func ListArticle(ctx *gin.Context) {

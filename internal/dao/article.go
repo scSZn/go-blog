@@ -50,7 +50,19 @@ func (a *ArticleDAO) GetArticleByArticleID(ctx context.Context, articleID string
 }
 
 func (a *ArticleDAO) CreateArticle(article *model.Article) error {
-	return a.db.Create(article).Error
+	err := a.db.Create(article).Error
+	if err != nil {
+		return errors.Wrapf(err, "ArticleDAO.CreateArticle: create article fail, article: %+v", article)
+	}
+	return nil
+}
+
+func (a *ArticleDAO) UpdateArticle(article *model.Article) error {
+	err := a.db.Updates(article).Where("article_id = ?", article.ArticleID).Error
+	if err != nil {
+		return errors.Wrapf(err, "ArticleDAO.UpdateArticle: update article fail, article: %+v", article)
+	}
+	return nil
 }
 
 // List 根据条件查询文章

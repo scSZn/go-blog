@@ -2,8 +2,9 @@ package service
 
 import (
 	"context"
-
 	"github.com/google/uuid"
+	"github.com/scSZn/blog/consts"
+
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
@@ -17,6 +18,8 @@ import (
 )
 
 type CreateArticleRequest struct {
+	ArticleID     string   `json:"article_id"`
+	IsDraft       bool     `json:"is_draft"`
 	Title         string   `json:"title"`
 	Author        string   `json:"author"`
 	Summary       string   `json:"summary"`
@@ -47,7 +50,7 @@ func NewArticleService(ctx context.Context) *ArticleService {
 	return service
 }
 
-func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
+func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*model.Article, error) {
 	tx := as.db.Begin()
 	articleDao := dao.NewArticleDAO(tx)
 	tagArticleDao := dao.NewTagArticleDAO(tx)
@@ -55,26 +58,43 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 
 	// 创建文章
 	article := &model.Article{
+		Model:         &model.Model{},
 		Title:         request.Title,
 		Author:        request.Author,
 		Summary:       request.Summary,
 		BackgroundURL: request.BackgroundURL,
 		Content:       request.Content,
-		ArticleID:     uuid.New().String(), // todo: ArticleID 使用分布式ID
 	}
-	err := articleDao.CreateArticle(article)
-	if err != nil {
-		tx.Rollback()
-		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create article fail, request is %+v, err: %+v", request, err)
-		return errcode.CreateArticleError
+	if request.IsDraft {
+		article.Status = consts.StatusDraft
+	} else {
+		article.Status = consts.StatusWaitingAudit
+	}
+
+	if request.ArticleID == "" {
+		article.ArticleID = request.ArticleID
+		err := articleDao.CreateArticle(article)
+		if err != nil {
+			tx.Rollback()
+			global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create article fail, request is %+v, err: %+v", request, err)
+			return nil, errcode.CreateArticleError
+		}
+	} else {
+		article.ArticleID = uuid.New().String()
+		err := articleDao.UpdateArticle(article)
+		if err != nil {
+			tx.Rollback()
+			global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create article fail, request is %+v, err: %+v", request, err)
+			return nil, errcode.CreateArticleError
+		}
 	}
 
 	// 创建文章与标签的关联关系
-	err = tagArticleDao.CreateTagArticleBatch(article.ArticleID, request.TagIDs)
+	err := tagArticleDao.CreateTagArticleBatch(article.ArticleID, request.TagIDs)
 	if err != nil {
 		tx.Rollback()
 		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create tag article relationship fail, request is %+v, err: %+v", request, err)
-		return errcode.CreateArticleError
+		return nil, errcode.CreateArticleError
 	}
 
 	// 更新标签的文章数量
@@ -82,7 +102,7 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 	if err != nil {
 		tx.Rollback()
 		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: update tag count fail, request is %+v, err: %+v", request, err)
-		return errcode.CreateArticleError
+		return nil, errcode.CreateArticleError
 	}
 
 	// 提交事务
@@ -90,9 +110,9 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) error {
 	if err != nil {
 		tx.Rollback()
 		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: commit fail, request is %+v, err: %+v", request, err)
-		return errcode.CreateArticleError
+		return nil, errcode.CreateArticleError
 	}
-	return nil
+	return article, nil
 }
 
 // List 获取文章列表
