@@ -2,9 +2,9 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/scSZn/blog/conf"
 	"github.com/scSZn/blog/consts"
-
 	"github.com/scSZn/blog/internal/middleware"
 	v1Admin "github.com/scSZn/blog/internal/routers/api/v1/admin"
 )

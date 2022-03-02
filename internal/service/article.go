@@ -50,7 +50,7 @@ func NewArticleService(ctx context.Context) *ArticleService {
 	return service
 }
 
-func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*model.Article, error) {
+func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.ArticleBaseInfo, error) {
 	tx := as.db.Begin()
 	articleDao := dao.NewArticleDAO(tx)
 	tagArticleDao := dao.NewTagArticleDAO(tx)
@@ -112,14 +112,15 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*model.A
 		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: commit fail, request is %+v, err: %+v", request, err)
 		return nil, errcode.CreateArticleError
 	}
-	return article, nil
+
+	articleBaseInfo := dto.GenArticleBashInfoFromArticleModel(article)
+	return articleBaseInfo, nil
 }
 
 // List 获取文章列表
 // request.Status 是否需要根据状态值来筛选文章
 // request.IsDel 是否需要获取已被软删除的文章
 func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseInfo, int64, error) {
-
 	articleDao := dao.NewArticleDAO(as.db)
 	tagArticleDao := dao.NewTagArticleDAO(as.db)
 	tagDao := dao.NewTagDAO(as.db)
@@ -184,14 +185,7 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 
 	var result = make([]*dto.ArticleBaseInfo, 0, len(articles))
 	for _, article := range articles {
-		articleBaseInfo := &dto.ArticleBaseInfo{
-			Model:         article.Model,
-			Title:         article.Title,
-			Summary:       article.Summary,
-			Author:        article.Author,
-			ArticleID:     article.ArticleID,
-			BackgroundURL: article.BackgroundURL,
-		}
+		articleBaseInfo := dto.GenArticleBashInfoFromArticleModel(article)
 		tagIDs := articleTagMap[article.ArticleID]
 		tags := make([]*model.Tag, 0, len(tagIDs))
 		for _, tagID := range tagIDs {
