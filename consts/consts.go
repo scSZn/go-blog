@@ -13,8 +13,9 @@ const (
 
 // 日志相关信息
 const (
-	LogTraceKey   = TraceKey("trace")
+	LogTraceKey   = TraceKey("trace_id")
 	LogTimeLayout = "2006-01-02 15:04:05.000-07:00"
+	CallerKey     = "caller"
 )
 
 // 删除状态

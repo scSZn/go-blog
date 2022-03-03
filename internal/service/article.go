@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/scSZn/blog/consts"
 
@@ -76,7 +77,10 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 		err := articleDao.CreateArticle(article)
 		if err != nil {
 			tx.Rollback()
-			global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create article fail, request is %+v, err: %+v", request, err)
+			global.Logger.Errorf(as.ctx, map[string]interface{}{
+				"params": fmt.Sprintf("%+v", request),
+				"error":  fmt.Sprintf("%+v", err),
+			}, "create article fail")
 			return nil, errcode.CreateArticleError
 		}
 	} else {
@@ -84,7 +88,10 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 		err := articleDao.UpdateArticle(article)
 		if err != nil {
 			tx.Rollback()
-			global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create article fail, request is %+v, err: %+v", request, err)
+			global.Logger.Errorf(as.ctx, map[string]interface{}{
+				"params": fmt.Sprintf("%+v", request),
+				"error":  fmt.Sprintf("%+v", err),
+			}, "update article fail")
 			return nil, errcode.CreateArticleError
 		}
 	}
@@ -93,7 +100,10 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 	err := tagArticleDao.CreateTagArticleBatch(article.ArticleID, request.TagIDs)
 	if err != nil {
 		tx.Rollback()
-		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: create tag article relationship fail, request is %+v, err: %+v", request, err)
+		global.Logger.Errorf(as.ctx, map[string]interface{}{
+			"params": fmt.Sprintf("%+v", request),
+			"error":  fmt.Sprintf("%+v", err),
+		}, "create tag article relationship fail")
 		return nil, errcode.CreateArticleError
 	}
 
@@ -101,7 +111,10 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 	err = tagDao.AddCount(request.TagIDs)
 	if err != nil {
 		tx.Rollback()
-		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: update tag count fail, request is %+v, err: %+v", request, err)
+		global.Logger.Errorf(as.ctx, map[string]interface{}{
+			"params": fmt.Sprintf("%+v", request),
+			"error":  fmt.Sprintf("%+v", err),
+		}, "update tag count fail")
 		return nil, errcode.CreateArticleError
 	}
 
@@ -109,7 +122,10 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
-		global.Logger.Errorf(as.ctx, "ArticleService.CreateArticle: commit fail, request is %+v, err: %+v", request, err)
+		global.Logger.Errorf(as.ctx, map[string]interface{}{
+			"params": fmt.Sprintf("%+v", request),
+			"error":  fmt.Sprintf("%+v", err),
+		}, "commit fail")
 		return nil, errcode.CreateArticleError
 	}
 
@@ -135,14 +151,20 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 
 	total, err := articleDao.Count(listParam)
 	if err != nil {
-		global.Logger.Errorf(as.ctx, "ArticleService.List: query articles total fail, request is %+v, err: %+v", request, err)
+		global.Logger.Errorf(as.ctx, map[string]interface{}{
+			"params": fmt.Sprintf("%+v", request),
+			"error":  fmt.Sprintf("%+v", err),
+		}, "query articles total fail")
 		return nil, 0, errcode.ListArticleError
 	}
 
 	// 获取符合条件的文章
 	articles, err := articleDao.List(listParam, request.Pager)
 	if err != nil {
-		global.Logger.Errorf(as.ctx, "ArticleService.List: query articles fail, request is %+v, err: %+v", request, err)
+		global.Logger.Errorf(as.ctx, map[string]interface{}{
+			"params": fmt.Sprintf("%+v", request),
+			"error":  fmt.Sprintf("%+v", err),
+		}, "query articles fail")
 		return nil, 0, errcode.ListArticleError
 	}
 
@@ -173,7 +195,10 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 	// 批量获取标签信息
 	tags, err := tagDao.GetTagByTagIDBatch(tagIDSet.Elements())
 	if err != nil {
-		global.Logger.Errorf(as.ctx, "ArticleService.List: query tag fail, request is %+v, err: %+v", request, err)
+		global.Logger.Errorf(as.ctx, map[string]interface{}{
+			"tag_ids": tagIDSet.Elements(),
+			"error":   err,
+		}, "query tag fail")
 		return nil, 0, errcode.ListArticleError
 	}
 

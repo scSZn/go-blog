@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/scSZn/blog/consts"
 	"strings"
 
@@ -41,7 +42,9 @@ func (a *ArticleDAO) GetArticleByArticleID(ctx context.Context, articleID string
 	err := a.db.Table(model.ArticleTableName).Where("article_id = ?", articleID).First(&result).Error
 	if err != nil {
 		if err == sql.ErrNoRows {
-			global.Logger.Infof(ctx, "[dao.GetArticleByArticleID] no rows, article_id: %s", articleID)
+			global.Logger.Infof(ctx, map[string]interface{}{
+				"params: ": fmt.Sprintf("articleID: %s", articleID),
+			}, "[dao.GetArticleByArticleID] no rows")
 			return nil, nil
 		}
 		return nil, err

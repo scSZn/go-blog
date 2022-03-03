@@ -1,9 +1,11 @@
 package admin
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/scSZn/blog/conf"
+	"fmt"
 
+	"github.com/gin-gonic/gin"
+
+	"github.com/scSZn/blog/conf"
 	"github.com/scSZn/blog/global"
 	"github.com/scSZn/blog/internal/service"
 	"github.com/scSZn/blog/pkg/app"
@@ -17,7 +19,9 @@ func CreateArticle(ctx *gin.Context) {
 
 	err := ctx.Bind(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "admin.CreateArticle: bind error, err: %+v", err)
+		global.Logger.Errorf(ctx, map[string]interface{}{
+			"error": fmt.Sprintf("%+v", err),
+		}, "bind error")
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
@@ -37,7 +41,9 @@ func ListArticle(ctx *gin.Context) {
 
 	err := ctx.Bind(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, "v1.ListArticleAdmin: bind error, err: %+v", err)
+		global.Logger.Errorf(ctx, map[string]interface{}{
+			"error": fmt.Sprintf("%+v", err),
+		}, "bind error")
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}

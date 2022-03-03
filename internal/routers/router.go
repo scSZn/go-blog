@@ -11,7 +11,7 @@ import (
 
 func NewRouter() *gin.Engine {
 	router := gin.New()
-	router.Use(middleware.Default())
+	router.Use(middleware.Trace())
 	router.Use(middleware.CORS())
 	apiV1 := router.Group("/api/v1")
 

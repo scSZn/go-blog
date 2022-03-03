@@ -2,61 +2,98 @@ package logger
 
 import (
 	"context"
-	"strings"
-
-	"github.com/sirupsen/logrus"
-	"gopkg.in/natefinch/lumberjack.v2"
-
+	"fmt"
 	"github.com/scSZn/blog/conf"
 	"github.com/scSZn/blog/consts"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
+	"runtime"
+	"strings"
 )
 
 type Logger struct {
 	*logrus.Logger
 }
 
-func (l *Logger) Tracef(ctx context.Context, format string, args ...interface{}) {
-	l.Logger.Tracef(format, args...)
+const depth = 2
+
+func (l *Logger) Tracef(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Tracef(format, args...)
 }
 
-func (l *Logger) Debug(ctx context.Context, args ...interface{}) {
-	l.Logger.Debug(args...)
+func (l *Logger) Debug(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Debug(args...)
 }
 
-func (l *Logger) Debugf(ctx context.Context, format string, args ...interface{}) {
-	l.Logger.Debugf(format, args...)
+func (l *Logger) Debugf(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Debugf(format, args...)
 }
 
-func (l *Logger) Info(ctx context.Context, args ...interface{}) {
-	l.Logger.Info(args...)
+func (l *Logger) Info(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Info(args...)
 }
 
-func (l *Logger) Infof(ctx context.Context, format string, args ...interface{}) {
-	l.Logger.Infof(format, args...)
+func (l *Logger) Infof(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Infof(format, args)
 }
 
-func (l *Logger) Warn(ctx context.Context, args ...interface{}) {
-	l.Logger.Warn(args...)
+func (l *Logger) Warn(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Warn(args...)
 }
 
-func (l *Logger) Warnf(ctx context.Context, format string, args ...interface{}) {
-	l.Logger.Warnf(format, args...)
+func (l *Logger) Warnf(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Warnf(format, args...)
 }
 
-func (l *Logger) Error(ctx context.Context, args ...interface{}) {
-	l.Logger.Error(args...)
+func (l *Logger) Error(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Error(args...)
 }
 
-func (l *Logger) Errorf(ctx context.Context, format string, args ...interface{}) {
-	l.Logger.Errorf(format, args...)
+func (l *Logger) Errorf(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Errorf(format, args...)
 }
 
-func (l *Logger) Fatal(ctx context.Context, args ...interface{}) {
-	l.Logger.Fatal(args...)
+func (l *Logger) Fatal(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Fatal(args...)
 }
 
-func (l *Logger) Fatalf(ctx context.Context, format string, args ...interface{}) {
-	l.Logger.Fatalf(format, args...)
+func (l *Logger) Fatalf(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
+	addTraceInfo(ctx, fields)
+	fields[consts.CallerKey] = getCallerInfo(depth)
+	l.Logger.WithFields(fields).Fatalf(format, args...)
+}
+
+func addTraceInfo(ctx context.Context, fields map[string]interface{}) {
+	traceId := ctx.Value(consts.LogTraceKey)
+	fields[string(consts.LogTraceKey)] = traceId
+}
+
+func getCallerInfo(depth int) string {
+	_, file, line, ok := runtime.Caller(depth)
+	if !ok {
+		return ""
+	}
+	return fmt.Sprintf("%s: %d", file, line)
 }
 
 // 对gorm的日志做处理，去除中间的换行符

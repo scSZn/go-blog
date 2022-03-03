@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/pkg/cos"
@@ -10,32 +11,42 @@ import (
 	"github.com/scSZn/blog/pkg/app"
 )
 
-func UploadImage(c *gin.Context) {
-	response := app.NewResponse(c)
-	fileHeader, err := c.FormFile("file")
+func UploadImage(ctx *gin.Context) {
+	response := app.NewResponse(ctx)
+	fileHeader, err := ctx.FormFile("file")
 	if err != nil {
-		global.Logger.Errorf(c, "v1Admin.UploadImage: get file fail, err: %+v", err)
+		global.Logger.Errorf(ctx, map[string]interface{}{
+			"error": fmt.Sprintf("%+v", err),
+		}, "bind error")
 		response.ReturnError(errcode.UploadFail)
 		return
 	}
 
 	filename := fileHeader.Filename
 	if fileHeader.Size > consts.MaxUploadSize {
-		global.Logger.Errorf(c, "v1Admin.UploadImage: upload file exceed max size, filename: %+v", filename)
+		global.Logger.Errorf(ctx, map[string]interface{}{
+			"file": fileHeader,
+		}, "upload file exceed max size")
 		response.ReturnError(errcode.UploadFail)
 		return
 	}
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		global.Logger.Errorf(c, "v1Admin.UploadImage: open file fail, err: %+v", err)
+		global.Logger.Errorf(ctx, map[string]interface{}{
+			"file":  fileHeader,
+			"error": err,
+		}, "open file fail")
 		response.ReturnError(errcode.UploadFail)
 		return
 	}
 
-	location, err := cos.UploadImage(c, filename, file)
+	location, err := cos.UploadImage(ctx, filename, file)
 	if err != nil {
-		global.Logger.Errorf(c, "v1Admin.UploadImage: upload file fail, filename is %+v, err: %+v", filename, err)
+		global.Logger.Errorf(ctx, map[string]interface{}{
+			"error": err,
+			"file":  fileHeader,
+		}, "upload file fail")
 		response.ReturnError(errcode.UploadFail)
 		return
 	}
