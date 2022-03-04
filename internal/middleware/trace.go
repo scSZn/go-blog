@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"bytes"
-	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -20,19 +19,18 @@ func Trace() gin.HandlerFunc {
 		request := ctx.Request
 		ctx.Writer = &CustomResponseWriter{ResponseWriter: ctx.Writer, body: bytes.NewBufferString("")}
 		requestString := fmt.Sprintf("%+v", request)
-		newCtx := context.WithValue(ctx, consts.LogTraceKey, genTraceId(requestString))
+		ctx.Set(string(consts.LogTraceKey), genTraceId(requestString))
 
-		ctx.Request = ctx.Request.WithContext(newCtx)
-		global.Logger.Infof(newCtx, map[string]interface{}{"request": requestString}, "")
+		global.Logger.Infof(ctx, map[string]interface{}{"request": requestString}, "request coming")
 
 		ctx.Next()
 
-		proc := time.Now().Sub(start).Milliseconds()
+		proc := float64(time.Since(start)) / 1e6
 		writer, _ := ctx.Writer.(*CustomResponseWriter)
-		global.Logger.Infof(newCtx, map[string]interface{}{
-			"proc":     fmt.Sprintf("%dms", proc),
+		global.Logger.Info(ctx, map[string]interface{}{
+			"proc":     fmt.Sprintf("%fms", proc),
 			"response": writer.GetResponseString(),
-		}, "")
+		})
 	}
 }
 

@@ -53,9 +53,9 @@ func NewArticleService(ctx context.Context) *ArticleService {
 
 func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.ArticleBaseInfo, error) {
 	tx := as.db.Begin()
-	articleDao := dao.NewArticleDAO(tx)
-	tagArticleDao := dao.NewTagArticleDAO(tx)
-	tagDao := dao.NewTagDAO(tx)
+	articleDao := dao.NewArticleDAO(as.ctx, tx)
+	tagArticleDao := dao.NewTagArticleDAO(as.ctx, tx)
+	tagDao := dao.NewTagDAO(as.ctx, tx)
 
 	// 创建文章
 	article := &model.Article{
@@ -137,9 +137,9 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 // request.Status 是否需要根据状态值来筛选文章
 // request.IsDel 是否需要获取已被软删除的文章
 func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseInfo, int64, error) {
-	articleDao := dao.NewArticleDAO(as.db)
-	tagArticleDao := dao.NewTagArticleDAO(as.db)
-	tagDao := dao.NewTagDAO(as.db)
+	articleDao := dao.NewArticleDAO(as.ctx, as.db)
+	tagArticleDao := dao.NewTagArticleDAO(as.ctx, as.db)
+	tagDao := dao.NewTagDAO(as.ctx, as.db)
 
 	listParam := &dao.ListArticleParams{
 		TitleLike:     request.Title,
@@ -228,7 +228,7 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 // request.IsDel 是否需要获取已被软删除的文章
 // todo；合并到List函数中
 func (as *ArticleService) Count(request *ListArticleRequest) (int64, error) {
-	articleDao := dao.NewArticleDAO(as.db)
+	articleDao := dao.NewArticleDAO(as.ctx, as.db)
 
 	listParam := &dao.ListArticleParams{
 		TitleLike:  request.Title,

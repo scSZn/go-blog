@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	Logger   *logger.Logger
+	Logger   logger.Logger
 	DB       *gorm.DB
 	Enforcer *casbin.Enforcer
 )

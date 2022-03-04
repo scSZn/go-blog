@@ -9,7 +9,7 @@ import (
 )
 
 func NewEnforcer() (*casbin.Enforcer, error) {
-	adapter, err := gormadapter.NewAdapterByDB(global.DB)
+	adapter, err := gormadapter.NewAdapterByDBUseTableName(global.DB, "", "casbin_rule")
 	if err != nil {
 		return nil, err
 	}

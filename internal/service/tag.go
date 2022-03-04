@@ -54,7 +54,7 @@ func NewTagService(ctx context.Context) *TagService {
 }
 
 func (ts *TagService) CreateTag(request *CreateTagRequest) error {
-	tagDao := dao.NewTagDAO(ts.db)
+	tagDao := dao.NewTagDAO(ts.ctx, ts.db)
 	tag := &model.Tag{
 		Model: &model.Model{
 			Status: 20,
@@ -83,7 +83,7 @@ func (ts *TagService) CreateTag(request *CreateTagRequest) error {
 }
 
 func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
-	tagDao := dao.NewTagDAO(ts.db)
+	tagDao := dao.NewTagDAO(ts.ctx, ts.db)
 
 	_, err := tagDao.DeleteTag(request.TagID)
 	if err != nil {
@@ -98,7 +98,7 @@ func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
 }
 
 func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagInfo, int64, error) {
-	tagDao := dao.NewTagDAO(ts.db)
+	tagDao := dao.NewTagDAO(ts.ctx, ts.db)
 
 	params := dao.ListTagParams{
 		TagName:       fmt.Sprintf("%%%s%%", request.TagName),
@@ -136,7 +136,7 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagInfo, int64, e
 }
 
 func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
-	tagDao := dao.NewTagDAO(ts.db)
+	tagDao := dao.NewTagDAO(ts.ctx, ts.db)
 	params := dao.ListTagParams{
 		TagName:       request.TagName,
 		OrderKey:      request.OrderKey,
@@ -158,7 +158,7 @@ func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
 }
 
 func (ts *TagService) UpdateTag(request *UpdateTagRequest) error {
-	tagDao := dao.NewTagDAO(ts.db)
+	tagDao := dao.NewTagDAO(ts.ctx, ts.db)
 
 	// 如果没有传入status，则默认修改为开启
 	var status uint8 = consts.StatusEnable

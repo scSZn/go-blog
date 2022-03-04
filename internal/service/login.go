@@ -34,9 +34,9 @@ func NewLoginService(ctx context.Context) *LoginService {
 }
 
 func (ls *LoginService) Login(request *LoginRequest) (string, error) {
-	userDao := dao.NewUserDAO(ls.db)
+	userDao := dao.NewUserDAO(ls.ctx, ls.db)
 
-	user, err := userDao.GetUserByUsername(ls.ctx, request.Username)
+	user, err := userDao.GetUserByUsername(request.Username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			global.Logger.Errorf(ls.ctx, map[string]interface{}{

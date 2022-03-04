@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
@@ -12,9 +13,9 @@ type TagArticleDAO struct {
 	db *gorm.DB
 }
 
-func NewTagArticleDAO(db *gorm.DB) *TagArticleDAO {
+func NewTagArticleDAO(ctx context.Context, db *gorm.DB) *TagArticleDAO {
 	return &TagArticleDAO{
-		db: db,
+		db: db.WithContext(ctx),
 	}
 }
 

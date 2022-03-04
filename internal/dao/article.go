@@ -27,9 +27,9 @@ type ArticleDAO struct {
 	db *gorm.DB
 }
 
-func NewArticleDAO(db *gorm.DB) *ArticleDAO {
+func NewArticleDAO(ctx context.Context, db *gorm.DB) *ArticleDAO {
 	return &ArticleDAO{
-		db: db,
+		db: db.WithContext(ctx),
 	}
 }
 

@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -26,9 +27,9 @@ type TagDAO struct {
 	db *gorm.DB
 }
 
-func NewTagDAO(db *gorm.DB) *TagDAO {
+func NewTagDAO(ctx context.Context, db *gorm.DB) *TagDAO {
 	return &TagDAO{
-		db: db,
+		db: db.WithContext(ctx),
 	}
 }
 

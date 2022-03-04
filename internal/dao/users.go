@@ -14,13 +14,13 @@ type UserDAO struct {
 	db *gorm.DB
 }
 
-func NewUserDAO(db *gorm.DB) *UserDAO {
+func NewUserDAO(ctx context.Context, db *gorm.DB) *UserDAO {
 	return &UserDAO{
-		db: db,
+		db: db.WithContext(ctx),
 	}
 }
 
-func (d *UserDAO) GetUserByUsername(ctx context.Context, username string) (*model.User, error) {
+func (d *UserDAO) GetUserByUsername(username string) (*model.User, error) {
 	var user *model.User
 
 	db := d.db.Table(model.UserTableName).Where("username = ? AND is_del = ?", username, consts.NoDelStatus)

@@ -27,7 +27,7 @@ func NewEngine(setting *conf.DatabaseSetting) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.Logger = logger.New(global.Logger, logger.Config{})
+	db.Logger = New(global.Logger, logger.Info, 0)
 	if conf.GetEnv() == consts.EnvDev {
 		db = db.Debug()
 	}
