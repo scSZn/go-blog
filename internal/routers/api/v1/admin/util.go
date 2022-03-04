@@ -27,7 +27,7 @@ func UploadImage(ctx *gin.Context) {
 		global.Logger.Errorf(ctx, map[string]interface{}{
 			"file": fileHeader,
 		}, "upload file exceed max size")
-		response.ReturnError(errcode.UploadFail)
+		response.ReturnError(errcode.UploadExceedMaxSize)
 		return
 	}
 
