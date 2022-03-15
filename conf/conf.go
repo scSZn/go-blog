@@ -20,12 +20,8 @@ func init() {
 		v.SetConfigType("yml")
 		v.AddConfigPath("./conf")
 		v.SetConfigName("setting")
-		v.RegisterAlias("dbsetting", "database")
-		v.RegisterAlias("cossetting", "cos")
-		v.RegisterAlias("logsetting", "log")
-		v.RegisterAlias("appsetting", "app")
-		v.RegisterAlias("tagstatus", "status.tag")
-		v.RegisterAlias("articlestatus", "status.article")
+		v.RegisterAlias("tag_status", "status.tag")
+		v.RegisterAlias("article_status", "status.article")
 
 		err := v.ReadInConfig()
 		if err != nil {
@@ -49,51 +45,51 @@ func GetSetting() *Setting {
 }
 
 type Setting struct {
-	Env           string
-	AppSetting    *AppSetting
-	LogSetting    *LogSetting
-	DBSetting     *DatabaseSetting
-	COSSetting    *COSSetting
-	TagStatus     []Status
-	ArticleStatus []Status
+	Env           string           `json:"env" mapstructure:"env"`
+	AppSetting    *AppSetting      `json:"app_setting" mapstructure:"app"`
+	LogSetting    *LogSetting      `json:"log_setting" mapstructure:"log"`
+	DBSetting     *DatabaseSetting `json:"db_setting" mapstructure:"database"`
+	COSSetting    *COSSetting      `json:"cos" mapstructure:"cos"`
+	TagStatus     []Status         `json:"tag_status" mapstructure:"tag_status"`
+	ArticleStatus []Status         `json:"article_status" mapstructure:"article_status"`
 }
 
 type AppSetting struct {
-	Host         string
-	Port         string
-	CasbinModel  string
-	AllowOrigins []string `json:"allow_origins"`
+	Host         string   `json:"host" mapstructure:"host"`
+	Port         string   `json:"port" mapstructure:"port"`
+	CasbinModel  string   `json:"casbin_model" mapstructure:"casbin_model"`
+	AllowOrigins []string `json:"allow_origins" mapstructure:"allow_origins"`
 }
 
 type LogSetting struct {
-	Path       string
-	Filename   string
-	Suffix     string
-	MaxSize    int
-	MaxBackups int
+	Path       string `json:"path" mapstructure:"path"`
+	Filename   string `json:"filename" mapstructure:"filename"`
+	Suffix     string `json:"suffix" mapstructure:"suffix"`
+	MaxSize    int    `json:"max_size" mapstructure:"max_size"`
+	MaxBackups int    `json:"max_backups" mapstructure:"max_backups"`
 }
 
 type DatabaseSetting struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	Dbname   string
-	Charset  string
-	Protocol string
+	Host     string `json:"host" mapstructure:"host"`
+	Port     string `json:"port" mapstructure:"port"`
+	Username string `json:"username" mapstructure:"username"`
+	Password string `json:"password" mapstructure:"password"`
+	Dbname   string `json:"dbname" mapstructure:"dbname"`
+	Charset  string `json:"charset" mapstructure:"charset"`
+	Protocol string `json:"protocol" mapstructure:"protocol"`
 }
 
 type COSSetting struct {
-	AppID     string
-	SecretID  string
-	SecretKey string
-	BaseURL   string
+	AppID     string `json:"app_id" mapstructure:"app_id"`
+	SecretID  string `json:"secret_id" mapstructure:"secret_id"`
+	SecretKey string `json:"secret_key" mapstructure:"secret_key"`
+	BaseURL   string `json:"base_url" mapstructure:"base_url"`
 }
 
 type Status struct {
-	Value   int    `json:"value"`
-	Name    string `json:"name"`
-	Display string `json:"display"`
+	Value   int    `json:"value" mapstructure:"value"`
+	Name    string `json:"name" mapstructure:"name"`
+	Display string `json:"display" mapstructure:"display"`
 }
 
 func GetEnv() string {
