@@ -3,10 +3,10 @@ package database
 import (
 	"context"
 	"fmt"
-	"gorm.io/gorm/utils"
 	"time"
 
 	"gorm.io/gorm/logger"
+	"gorm.io/gorm/utils"
 
 	myLogger "github.com/scSZn/blog/pkg/logger"
 )
@@ -33,19 +33,19 @@ func (l *DBLogger) LogMode(level logger.LogLevel) logger.Interface {
 
 func (l *DBLogger) Info(ctx context.Context, format string, args ...interface{}) {
 	if l.LogLevel >= logger.Info {
-		l.logger.Infof(ctx, map[string]interface{}{}, format, args)
+		l.logger.Infof(ctx, nil, format, args)
 	}
 }
 
 func (l *DBLogger) Warn(ctx context.Context, format string, args ...interface{}) {
 	if l.LogLevel >= logger.Warn {
-		l.logger.Warnf(ctx, map[string]interface{}{}, format, args)
+		l.logger.Warnf(ctx, nil, nil, format, args)
 	}
 }
 
 func (l *DBLogger) Error(ctx context.Context, format string, args ...interface{}) {
 	if l.LogLevel >= logger.Error {
-		l.logger.Errorf(ctx, map[string]interface{}{}, format, args)
+		l.logger.Errorf(ctx, nil, nil, format, args)
 	}
 }
 
@@ -64,13 +64,13 @@ func (l *DBLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 		sql, rows := fc()
 		fields["sql"] = sql
 		fields["rows"] = rows
-		l.logger.Error(ctx, fields)
+		l.logger.Error(ctx, fields, err)
 	case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.LogLevel > logger.Warn:
 		sql, rows := fc()
 		fields["slowlog"] = fmt.Sprintf("SLOW SQL >= %v", l.SlowThreshold)
 		fields["sql"] = sql
 		fields["rows"] = rows
-		l.logger.Warn(ctx, fields)
+		l.logger.Warn(ctx, fields, nil)
 	case l.LogLevel == logger.Info:
 		sql, rows := fc()
 		fields["sql"] = sql

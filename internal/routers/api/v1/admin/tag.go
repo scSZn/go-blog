@@ -1,8 +1,6 @@
 package admin
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/scSZn/blog/conf"
@@ -18,9 +16,7 @@ func CreateTag(ctx *gin.Context) {
 
 	err := ctx.Bind(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, map[string]interface{}{
-			"error": fmt.Sprintf("%+v", err),
-		}, "bind error")
+		global.Logger.Errorf(ctx, nil, err, "bind error")
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
@@ -40,9 +36,7 @@ func DeleteTag(ctx *gin.Context) {
 
 	err := ctx.BindUri(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, map[string]interface{}{
-			"error": fmt.Sprintf("%+v", err),
-		}, "bind error")
+		global.Logger.Errorf(ctx, nil, err, "bind error")
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
@@ -62,9 +56,7 @@ func ListTag(ctx *gin.Context) {
 
 	err := ctx.BindQuery(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, map[string]interface{}{
-			"error": fmt.Sprintf("%+v", err),
-		}, "bind error")
+		global.Logger.Errorf(ctx, nil, err, "bind error")
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
@@ -90,18 +82,14 @@ func UpdateTag(ctx *gin.Context) {
 	// 绑定JSON
 	err := ctx.Bind(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, map[string]interface{}{
-			"error": fmt.Sprintf("%+v", err),
-		}, "bind error")
+		global.Logger.Errorf(ctx, nil, err, "bind error")
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}
 	// 绑定路径参数
 	err = ctx.BindUri(&request)
 	if err != nil {
-		global.Logger.Errorf(ctx, map[string]interface{}{
-			"error": fmt.Sprintf("%+v", err),
-		}, "bind error")
+		global.Logger.Errorf(ctx, nil, err, "bind error")
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}

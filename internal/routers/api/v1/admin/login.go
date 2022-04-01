@@ -1,8 +1,6 @@
 package admin
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/scSZn/blog/global"
@@ -17,9 +15,7 @@ func Login(ctx *gin.Context) {
 
 	err := ctx.Bind(request)
 	if err != nil {
-		global.Logger.Errorf(ctx, map[string]interface{}{
-			"error": fmt.Sprintf("%+v", err),
-		}, "bind error")
+		global.Logger.Errorf(ctx, nil, err, "bind error")
 		response.ReturnError(errcode.ClientRequestError)
 		return
 	}

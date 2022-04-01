@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
@@ -32,7 +33,7 @@ func (d *TagArticleDAO) CreateTagArticleBatch(articleID string, tagIDs []string)
 		})
 	}
 	if err := d.db.Create(tagArticles).Error; err != nil {
-		return errors.Wrap(err, "TagArticleDAO.CreateTagArticleBatch:create tag_article relationship fail")
+		return errors.Wrap(err, "TagArticleDAO.CreateTagArticleBatch: create tag_article relationship fail")
 	}
 	return nil
 }

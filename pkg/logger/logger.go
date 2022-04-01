@@ -2,13 +2,16 @@ package logger
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
+
+	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
+
 	"github.com/scSZn/blog/conf"
 	"github.com/scSZn/blog/consts"
 	"github.com/scSZn/blog/pkg/util"
-	"github.com/sirupsen/logrus"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
+
+type Fields = map[string]interface{}
 
 type Logger interface {
 	Tracef(context.Context, map[string]interface{}, string, ...interface{})
@@ -17,10 +20,10 @@ type Logger interface {
 	Debug(context.Context, map[string]interface{}, ...interface{})
 	Infof(context.Context, map[string]interface{}, string, ...interface{})
 	Info(context.Context, map[string]interface{}, ...interface{})
-	Warnf(context.Context, map[string]interface{}, string, ...interface{})
-	Warn(context.Context, map[string]interface{}, ...interface{})
-	Errorf(context.Context, map[string]interface{}, string, ...interface{})
-	Error(context.Context, map[string]interface{}, ...interface{})
+	Warnf(context.Context, map[string]interface{}, error, string, ...interface{})
+	Warn(context.Context, map[string]interface{}, error, ...interface{})
+	Errorf(context.Context, map[string]interface{}, error, string, ...interface{})
+	Error(context.Context, map[string]interface{}, error, ...interface{})
 	Fatalf(context.Context, map[string]interface{}, string, ...interface{})
 	Fatal(context.Context, map[string]interface{}, ...interface{})
 }
@@ -32,107 +35,87 @@ type DefaultLogger struct {
 const depth = 2
 
 func (l *DefaultLogger) Trace(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
-	addTraceInfo(ctx, fields)
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Trace(args...)
+	l.Logger.WithContext(ctx).WithFields(fields).Trace(args...)
 }
 
 func (l *DefaultLogger) Tracef(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
-	addTraceInfo(ctx, fields)
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Tracef(format, args...)
+	l.Logger.WithContext(ctx).WithFields(fields).Tracef(format, args...)
 }
 
 func (l *DefaultLogger) Debug(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
-	addTraceInfo(ctx, fields)
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Debug(args...)
+	l.Logger.WithContext(ctx).WithFields(fields).Debug(args...)
 }
 
 func (l *DefaultLogger) Debugf(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
-	addTraceInfo(ctx, fields)
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Debugf(format, args...)
+	l.Logger.WithContext(ctx).WithFields(fields).Debugf(format, args...)
 }
 
 func (l *DefaultLogger) Info(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
-	addTraceInfo(ctx, fields)
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Info(args...)
+	l.Logger.WithContext(ctx).WithFields(fields).Info(args...)
 }
 
 func (l *DefaultLogger) Infof(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
-	addTraceInfo(ctx, fields)
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Infof(format, args)
+	l.Logger.WithContext(ctx).WithFields(fields).Infof(format, args)
 }
 
-func (l *DefaultLogger) Warn(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
-	addTraceInfo(ctx, fields)
+func (l *DefaultLogger) Warn(ctx context.Context, fields map[string]interface{}, err error, args ...interface{}) {
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Warn(args...)
+	l.Logger.WithContext(ctx).WithError(err).WithFields(fields).Warn(args...)
 }
 
-func (l *DefaultLogger) Warnf(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
-	addTraceInfo(ctx, fields)
+func (l *DefaultLogger) Warnf(ctx context.Context, fields map[string]interface{}, err error, format string, args ...interface{}) {
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Warnf(format, args...)
+	l.Logger.WithContext(ctx).WithError(err).WithFields(fields).Warnf(format, args...)
 }
 
-func (l *DefaultLogger) Error(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
-	addTraceInfo(ctx, fields)
+func (l *DefaultLogger) Error(ctx context.Context, fields map[string]interface{}, err error, args ...interface{}) {
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Error(args...)
+	l.Logger.WithContext(ctx).WithFields(fields).WithError(err).Error(args...)
 }
 
-func (l *DefaultLogger) Errorf(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
-	addTraceInfo(ctx, fields)
+func (l *DefaultLogger) Errorf(ctx context.Context, fields map[string]interface{}, err error, format string, args ...interface{}) {
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Errorf(format, args...)
+	l.Logger.WithContext(ctx).WithFields(fields).WithError(err).Errorf(format, args...)
 }
 
 func (l *DefaultLogger) Fatal(ctx context.Context, fields map[string]interface{}, args ...interface{}) {
-	addTraceInfo(ctx, fields)
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Fatal(args...)
+	l.Logger.WithContext(ctx).WithFields(fields).Fatal(args...)
 }
 
 func (l *DefaultLogger) Fatalf(ctx context.Context, fields map[string]interface{}, format string, args ...interface{}) {
-	addTraceInfo(ctx, fields)
 	if _, ok := fields[consts.CallerKey]; !ok {
 		fields[consts.CallerKey] = util.GetCallerFileAndLine(depth)
 	}
-	l.Logger.WithFields(fields).Fatalf(format, args...)
-}
-
-func addTraceInfo(ctx context.Context, fields map[string]interface{}) {
-	traceId := ctx.Value(consts.LogTraceKey)
-	if ginCtx, ok := ctx.(*gin.Context); traceId == nil && ok {
-		traceId = ginCtx.GetString(string(consts.LogTraceKey))
-	}
-	fields[string(consts.LogTraceKey)] = traceId
+	l.Logger.WithContext(ctx).WithFields(fields).Fatalf(format, args...)
 }
 
 func NewLogger(setting *conf.LogSetting) (Logger, error) {

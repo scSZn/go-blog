@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/hex"
-	"fmt"
+	"github.com/scSZn/blog/pkg/logger"
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
@@ -39,43 +39,28 @@ func (ls *LoginService) Login(request *LoginRequest) (string, error) {
 	user, err := userDao.GetUserByUsername(request.Username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			global.Logger.Errorf(ls.ctx, map[string]interface{}{
-				"params": fmt.Sprintf("%+v", request),
-				"error":  fmt.Sprintf("%+v", err),
-			}, "login fail, no such user")
+			global.Logger.Errorf(ls.ctx, logger.Fields{"params": request}, err, "login fail, no such user")
 			return "", errcode.LoginFail
 		} else {
-			global.Logger.Errorf(ls.ctx, map[string]interface{}{
-				"params": fmt.Sprintf("%+v", request),
-				"error":  fmt.Sprintf("%+v", err),
-			}, "login fail, mysql error")
+			global.Logger.Errorf(ls.ctx, logger.Fields{"params": request}, err, "login fail, mysql error")
 			return "", errcode.ServerError
 		}
 	}
 
 	realPassport, err := hex.DecodeString(user.Passport)
 	if err != nil {
-		global.Logger.Errorf(ls.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "decode user real passport fail")
+		global.Logger.Errorf(ls.ctx, logger.Fields{"params": request}, err, "decode user real passport fail")
 		return "", errcode.ServerError
 	}
 
 	if err = bcrypt.CompareHashAndPassword(realPassport, []byte(request.Password)); err != nil {
-		global.Logger.Errorf(ls.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "login fail, passport incorrect")
+		global.Logger.Errorf(ls.ctx, logger.Fields{"params": request}, err, "login fail, passport incorrect")
 		return "", errcode.ServerError
 	}
 
 	token, err := util.GenerateToken(user)
 	if err != nil {
-		global.Logger.Errorf(ls.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "generate token fail")
+		global.Logger.Errorf(ls.ctx, logger.Fields{"params": request}, err, "generate token fail")
 		return "", errcode.ServerError
 	}
 

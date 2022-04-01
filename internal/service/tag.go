@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/scSZn/blog/pkg/logger"
 	"strings"
 
 	"github.com/google/uuid"
@@ -66,17 +67,12 @@ func (ts *TagService) CreateTag(request *CreateTagRequest) error {
 
 	rowAffected, err := tagDao.CreateTag(tag)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "create tag fail")
+		global.Logger.Errorf(ts.ctx, logger.Fields{"params": request}, err, "create tag fail")
 		return errcode.CreateTagError
 	}
 
 	if rowAffected == 0 {
-		global.Logger.Warnf(ts.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-		}, "tag already exists", request.TagName)
+		global.Logger.Warnf(ts.ctx, logger.Fields{"params": request}, nil, "tag [%s] already exists", request.TagName)
 		return errcode.TagAlreadyExistError
 	}
 	return nil
@@ -87,10 +83,7 @@ func (ts *TagService) DeleteTag(request *DeleteTagRequest) error {
 
 	_, err := tagDao.DeleteTag(request.TagID)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "delete tag fail")
+		global.Logger.Errorf(ts.ctx, logger.Fields{"params": request}, err, "delete tag fail")
 		return errcode.DeleteTagError
 	}
 
@@ -110,10 +103,7 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagInfo, int64, e
 
 	tags, err := tagDao.ListTag(&params, &request.Pager)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "list tag fail")
+		global.Logger.Errorf(ts.ctx, logger.Fields{"params": request}, err, "list tag fail")
 		return nil, 0, errcode.ListTagError
 	}
 	for _, tag := range tags {
@@ -125,10 +115,7 @@ func (ts *TagService) ListTag(request *ListTagRequest) ([]*dto.TagInfo, int64, e
 
 	total, err := tagDao.CountTag(&params)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "count tag fail", params, err)
+		global.Logger.Errorf(ts.ctx, logger.Fields{"params": request}, err, "count tag fail")
 		return nil, 0, errcode.ListTagError
 	}
 
@@ -147,10 +134,7 @@ func (ts *TagService) CountTag(request *ListTagRequest) (int64, error) {
 
 	result, err := tagDao.CountTag(&params)
 	if err != nil {
-		global.Logger.Errorf(ts.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "count tag fail")
+		global.Logger.Errorf(ts.ctx, logger.Fields{"params": request}, err, "count tag fail")
 		return 0, errcode.ListTagError
 	}
 
@@ -169,24 +153,15 @@ func (ts *TagService) UpdateTag(request *UpdateTagRequest) error {
 	result, err := tagDao.UpdateTag(request.TagID, request.Status, request.TagName)
 	if err != nil {
 		if strings.Contains(strings.ToLower(err.Error()), "duplicate entry") {
-			global.Logger.Warnf(ts.ctx, map[string]interface{}{
-				"params": fmt.Sprintf("%+v", request),
-				"error":  fmt.Sprintf("%+v", err),
-			}, "update tag status fail, tag_name is already exists")
+			global.Logger.Warnf(ts.ctx, logger.Fields{"params": request}, err, "update tag status fail, tag_name is already exists")
 			return errcode.TagAlreadyExistError
 		}
-		global.Logger.Errorf(ts.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "update tag status fail")
+		global.Logger.Errorf(ts.ctx, logger.Fields{"params": request}, err, "update tag status fail")
 		return errcode.UpdateTagError
 	}
 
 	if result == 0 {
-		global.Logger.Errorf(ts.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "update tag status fail, unknown error, row affected is 0")
+		global.Logger.Errorf(ts.ctx, logger.Fields{"params": request}, err, "update tag status fail, unknown error, row affected is 0")
 		return errcode.UpdateTagError
 	}
 

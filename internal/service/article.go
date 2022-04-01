@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
-	"fmt"
+
 	"github.com/google/uuid"
+
 	"github.com/scSZn/blog/consts"
+	"github.com/scSZn/blog/pkg/logger"
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -52,6 +54,7 @@ func NewArticleService(ctx context.Context) *ArticleService {
 }
 
 func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.ArticleBaseInfo, error) {
+	global.Logger.Infof(as.ctx, logger.Fields{"params": request}, "begin create article")
 	tx := as.db.Begin()
 	articleDao := dao.NewArticleDAO(as.ctx, tx)
 	tagArticleDao := dao.NewTagArticleDAO(as.ctx, tx)
@@ -73,37 +76,31 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 	}
 
 	if request.ArticleID == "" {
-		article.ArticleID = request.ArticleID
+		global.Logger.Debugf(as.ctx, nil, "article_id is empty, create article")
+		article.ArticleID = uuid.New().String()
 		err := articleDao.CreateArticle(article)
 		if err != nil {
 			tx.Rollback()
-			global.Logger.Errorf(as.ctx, map[string]interface{}{
-				"params": fmt.Sprintf("%+v", request),
-				"error":  fmt.Sprintf("%+v", err),
-			}, "create article fail")
+			global.Logger.Errorf(as.ctx, logger.Fields{"params": request}, err, "create article fail")
 			return nil, errcode.CreateArticleError
 		}
 	} else {
-		article.ArticleID = uuid.New().String()
+		global.Logger.Debugf(as.ctx, logger.Fields{"article_id": request.ArticleID}, "article_id is not empty, update article")
+		article.ArticleID = request.ArticleID
 		err := articleDao.UpdateArticle(article)
 		if err != nil {
 			tx.Rollback()
-			global.Logger.Errorf(as.ctx, map[string]interface{}{
-				"params": fmt.Sprintf("%+v", request),
-				"error":  fmt.Sprintf("%+v", err),
-			}, "update article fail")
+			global.Logger.Errorf(as.ctx, logger.Fields{"params": request}, err, "update article fail")
 			return nil, errcode.CreateArticleError
 		}
 	}
 
+	global.Logger.Debugf(as.ctx, logger.Fields{"article_id": article.ArticleID, "tag_ids": request.TagIDs}, "begin create tag_article relationship")
 	// 创建文章与标签的关联关系
 	err := tagArticleDao.CreateTagArticleBatch(article.ArticleID, request.TagIDs)
 	if err != nil {
 		tx.Rollback()
-		global.Logger.Errorf(as.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "create tag article relationship fail")
+		global.Logger.Errorf(as.ctx, logger.Fields{"params": request}, err, "create tag article relationship fail")
 		return nil, errcode.CreateArticleError
 	}
 
@@ -111,10 +108,7 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 	err = tagDao.AddCount(request.TagIDs)
 	if err != nil {
 		tx.Rollback()
-		global.Logger.Errorf(as.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "update tag count fail")
+		global.Logger.Errorf(as.ctx, logger.Fields{"params": request}, err, "update tag count fail")
 		return nil, errcode.CreateArticleError
 	}
 
@@ -122,10 +116,7 @@ func (as *ArticleService) CreateArticle(request *CreateArticleRequest) (*dto.Art
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
-		global.Logger.Errorf(as.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "commit fail")
+		global.Logger.Errorf(as.ctx, logger.Fields{"params": request}, err, "commit fail")
 		return nil, errcode.CreateArticleError
 	}
 
@@ -151,20 +142,14 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 
 	total, err := articleDao.Count(listParam)
 	if err != nil {
-		global.Logger.Errorf(as.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "query articles total fail")
+		global.Logger.Errorf(as.ctx, logger.Fields{"params": request}, err, "query articles total fail")
 		return nil, 0, errcode.ListArticleError
 	}
 
 	// 获取符合条件的文章
 	articles, err := articleDao.List(listParam, request.Pager)
 	if err != nil {
-		global.Logger.Errorf(as.ctx, map[string]interface{}{
-			"params": fmt.Sprintf("%+v", request),
-			"error":  fmt.Sprintf("%+v", err),
-		}, "query articles fail")
+		global.Logger.Errorf(as.ctx, logger.Fields{"params": request}, err, "query articles fail")
 		return nil, 0, errcode.ListArticleError
 	}
 
@@ -195,10 +180,7 @@ func (as *ArticleService) List(request *ListArticleRequest) ([]*dto.ArticleBaseI
 	// 批量获取标签信息
 	tags, err := tagDao.GetTagByTagIDBatch(tagIDSet.Elements())
 	if err != nil {
-		global.Logger.Errorf(as.ctx, map[string]interface{}{
-			"tag_ids": tagIDSet.Elements(),
-			"error":   err,
-		}, "query tag fail")
+		global.Logger.Errorf(as.ctx, logger.Fields{"tag_ids": tagIDSet.Elements()}, err, "query tag fail")
 		return nil, 0, errcode.ListArticleError
 	}
 
